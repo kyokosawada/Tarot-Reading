@@ -1,0 +1,8 @@
+{
+  "rules": [
+    "Project tarot reading app that will use AI to translate the readings",
+    "Follow MVVM Pattern",
+    "Use Kotlin as primary programming language for Android development",
+    "Follow Material Design 3 guidelines for UI components"
+  ]
+}
