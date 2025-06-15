@@ -7,10 +7,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
@@ -246,7 +246,7 @@ fun PreferencesSection(
             )
             
             PreferenceItem(
-                icon = Icons.Default.History,
+                icon = Icons.AutoMirrored.Filled.List,
                 title = "Reading History",
                 subtitle = "View your past readings",
                 onClick = { }
@@ -304,7 +304,7 @@ fun AccountSection(
                 )
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.Logout,
+                    imageVector = Icons.AutoMirrored.Filled.ExitToApp,
                     contentDescription = null,
                     modifier = Modifier.padding(end = 8.dp)
                 )
@@ -400,5 +400,13 @@ fun StatsSectionPreview() {
 fun PreferencesSectionPreview() {
     TarotTheme {
         PreferencesSection()
+    }
+}
+
+@Preview(showBackground = true, name = "Account Section")
+@Composable
+fun AccountSectionPreview() {
+    TarotTheme {
+        AccountSection()
     }
 }
