@@ -63,7 +63,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     onNavigateToReading: (String) -> Unit = {},
-    onNavigateToHistory: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -74,10 +73,6 @@ fun HomeScreen(
         drawerState = drawerState,
         drawerContent = {
             MysticNavigationDrawer(
-                onNavigateToHistory = {
-                    scope.launch { drawerState.close() }
-                    onNavigateToHistory()
-                },
                 onNavigateToProfile = {
                     scope.launch { drawerState.close() }
                     onNavigateToProfile()
@@ -278,7 +273,6 @@ fun ReadingOptions(
 
 @Composable
 fun MysticNavigationDrawer(
-    onNavigateToHistory: () -> Unit,
     onNavigateToProfile: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -328,11 +322,6 @@ fun MysticNavigationDrawer(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Navigation Items
-            MysticNavigationItem(
-                text = "Reading History",
-                onClick = onNavigateToHistory
-            )
-
             MysticNavigationItem(
                 text = "Profile",
                 onClick = onNavigateToProfile
