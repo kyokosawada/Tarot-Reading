@@ -60,8 +60,7 @@ class HomeViewModel : ViewModel() {
             try {
                 _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
 
-                // Simulate API calls
-                kotlinx.coroutines.delay(1000)
+                // Simulate API call
 
                 val dailyInsight = generateDailyInsight()
                 val recentReadings = generateRecentReadings()
@@ -89,8 +88,7 @@ class HomeViewModel : ViewModel() {
             try {
                 _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
 
-                // Simulate starting a new reading
-                kotlinx.coroutines.delay(1500)
+                // Simulate new reading
 
                 val newReading = generateReading(readingType)
                 val updatedReadings = listOf(newReading) + _uiState.value.recentReadings.take(4)
@@ -234,6 +232,7 @@ class HomeViewModel : ViewModel() {
     }
 
     private fun getCurrentDate(): String {
-        return java.time.LocalDate.now().toString()
+        return java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+            .format(java.util.Date())
     }
 }

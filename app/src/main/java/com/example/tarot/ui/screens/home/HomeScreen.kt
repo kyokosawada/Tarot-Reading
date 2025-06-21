@@ -1,30 +1,62 @@
 package com.example.tarot.ui.screens.home
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.tarot.ui.theme.BackgroundEnd
+import com.example.tarot.ui.theme.BackgroundStart
+import com.example.tarot.ui.theme.CardBack
+import com.example.tarot.ui.theme.CardBorder
+import com.example.tarot.ui.theme.CardGlow
+import com.example.tarot.ui.theme.MysticCosmic
+import com.example.tarot.ui.theme.MysticDarkBlue
+import com.example.tarot.ui.theme.MysticGold
+import com.example.tarot.ui.theme.MysticNavy
+import com.example.tarot.ui.theme.MysticPurple
+import com.example.tarot.ui.theme.MysticSilver
 import com.example.tarot.ui.theme.TarotTheme
+import com.example.tarot.ui.theme.TextAccent
+import com.example.tarot.ui.theme.TextPrimary
+import com.example.tarot.ui.theme.TextSecondary
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,7 +73,7 @@ fun HomeScreen(
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            NavigationDrawerContent(
+            MysticNavigationDrawer(
                 onNavigateToHistory = {
                     scope.launch { drawerState.close() }
                     onNavigateToHistory()
@@ -53,55 +85,97 @@ fun HomeScreen(
             )
         }
     ) {
-        Scaffold(
+        androidx.compose.material3.Scaffold(
+            modifier = modifier.fillMaxSize(),
             topBar = {
-                TopAppBar(
+                androidx.compose.material3.TopAppBar(
                     title = {
                         Text(
-                            text = "Tarot Readings",
-                            fontWeight = FontWeight.Bold
+                            text = "MYSTICA",
+                            color = TextAccent,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 2.sp
                         )
                     },
                     navigationIcon = {
                         IconButton(
-                            onClick = { scope.launch { drawerState.open() } }
+                            onClick = {
+                                scope.launch {
+                                    if (drawerState.isClosed) {
+                                        drawerState.open()
+                                    } else {
+                                        drawerState.close()
+                                    }
+                                }
+                            }
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Menu,
-                                contentDescription = "Menu"
+                                contentDescription = "Open navigation menu",
+                                tint = TextPrimary
                             )
                         }
                     },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    actions = {
+                        IconButton(onClick = onNavigateToProfile) {
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = "Go to profile",
+                                tint = TextPrimary
+                            )
+                        }
+                    },
+                    colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
+                        containerColor = MysticDarkBlue,
+                        titleContentColor = TextAccent,
+                        navigationIconContentColor = TextPrimary,
+                        actionIconContentColor = TextPrimary
                     )
                 )
-            }
+            },
+            containerColor = MysticDarkBlue
         ) { paddingValues ->
-            LazyColumn(
-                modifier = modifier
+            Box(
+                modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
-                item {
-                    WelcomeCard()
-                }
-
-                item {
-                    ReadingTypesSection(onNavigateToReading = onNavigateToReading)
-                }
-
-                item {
-                    DailyInsightCard()
-                }
-
-                item {
-                    QuickActionsSection(
-                        onNavigateToReading = onNavigateToReading,
-                        onNavigateToHistory = onNavigateToHistory
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                BackgroundStart,
+                                BackgroundEnd
+                            )
+                        )
                     )
+            ) {
+                // Main Content
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    // Subtitle
+                    Text(
+                        text = "Tarot & Divination",
+                        fontSize = 14.sp,
+                        color = TextSecondary,
+                        letterSpacing = 2.sp,
+                        modifier = Modifier.padding(bottom = 48.dp)
+                    )
+
+                    // Central Tarot Card
+                    MysticTarotCard()
+
+                    Spacer(modifier = Modifier.height(48.dp))
+
+                    // Reading Options
+                    ReadingOptions(onNavigateToReading = onNavigateToReading)
+
+                    Spacer(modifier = Modifier.height(32.dp))
                 }
             }
         }
@@ -109,13 +183,109 @@ fun HomeScreen(
 }
 
 @Composable
-fun NavigationDrawerContent(
+fun MysticTarotCard() {
+    Box(
+        modifier = Modifier
+            .size(width = 200.dp, height = 320.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        CardBack,
+                        MysticNavy
+                    )
+                )
+            )
+            .border(
+                width = 2.dp,
+                color = CardBorder,
+                shape = RoundedCornerShape(16.dp)
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        // Card glow effect
+        Box(
+            modifier = Modifier
+                .size(width = 180.dp, height = 300.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(CardGlow)
+        )
+        
+        // Diamond symbol in center
+        Box(
+            modifier = Modifier
+                .size(12.dp)
+                .background(
+                    color = MysticGold,
+                    shape = RoundedCornerShape(2.dp)
+                )
+                .rotate(45f)
+        )
+    }
+}
+
+@Composable
+fun ReadingOptions(
+    onNavigateToReading: (String) -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        // Daily Reading - Primary button
+        Button(
+            onClick = { onNavigateToReading("daily") },
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .height(56.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MysticGold,
+                contentColor = MysticDarkBlue
+            ),
+            shape = RoundedCornerShape(28.dp)
+        ) {
+            Text(
+                text = "Daily Reading",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+        // Ask a Question
+        OutlinedButton(
+            onClick = { onNavigateToReading("question") },
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .height(56.dp),
+            border = ButtonDefaults.outlinedButtonBorder.copy(
+                brush = Brush.horizontalGradient(
+                    colors = listOf(MysticGold, MysticSilver)
+                )
+            ),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = TextPrimary
+            ),
+            shape = RoundedCornerShape(28.dp)
+        ) {
+            Text(
+                text = "Ask a Question",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
+    }
+}
+
+@Composable
+fun MysticNavigationDrawer(
     onNavigateToHistory: () -> Unit,
     onNavigateToProfile: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     ModalDrawerSheet(
-        modifier = modifier.width(280.dp)
+        modifier = modifier.width(280.dp),
+        drawerContainerColor = MysticNavy,
+        drawerContentColor = TextPrimary
     ) {
         Column(
             modifier = Modifier
@@ -129,10 +299,10 @@ fun NavigationDrawerContent(
                     .height(120.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(
-                        brush = Brush.horizontalGradient(
+                        brush = Brush.verticalGradient(
                             colors = listOf(
-                                MaterialTheme.colorScheme.primary,
-                                MaterialTheme.colorScheme.secondary
+                                MysticPurple,
+                                MysticCosmic
                             )
                         )
                     ),
@@ -146,10 +316,11 @@ fun NavigationDrawerContent(
                         fontSize = 32.sp
                     )
                     Text(
-                        text = "Mystic Tarot",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        fontWeight = FontWeight.Bold
+                        text = "MYSTICA",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextAccent,
+                        letterSpacing = 2.sp
                     )
                 }
             }
@@ -157,24 +328,18 @@ fun NavigationDrawerContent(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Navigation Items
-            NavigationDrawerItem(
-                icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = null) },
-                label = { Text("Reading History") },
-                selected = false,
+            MysticNavigationItem(
+                text = "Reading History",
                 onClick = onNavigateToHistory
             )
 
-            NavigationDrawerItem(
-                icon = { Icon(Icons.Default.Person, contentDescription = null) },
-                label = { Text("Profile") },
-                selected = false,
+            MysticNavigationItem(
+                text = "Profile",
                 onClick = onNavigateToProfile
             )
 
-            NavigationDrawerItem(
-                icon = { Icon(Icons.Default.Settings, contentDescription = null) },
-                label = { Text("Settings") },
-                selected = false,
+            MysticNavigationItem(
+                text = "Settings",
                 onClick = { }
             )
         }
@@ -182,228 +347,27 @@ fun NavigationDrawerContent(
 }
 
 @Composable
-fun WelcomeCard(
-    modifier: Modifier = Modifier
+fun MysticNavigationItem(
+    text: String,
+    onClick: () -> Unit
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "🌟",
-                fontSize = 32.sp,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-            Text(
-                text = "Welcome to Your Mystical Journey",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-            Text(
-                text = "Discover the ancient wisdom of tarot cards and unlock the secrets of your destiny",
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-        }
-    }
-}
-
-@Composable
-fun ReadingTypesSection(
-    onNavigateToReading: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier) {
-        Text(
-            text = "Choose Your Reading",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(readingTypes) { readingType ->
-                ReadingTypeCard(
-                    readingType = readingType,
-                    onClick = { onNavigateToReading(readingType.type) }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun ReadingTypeCard(
-    readingType: ReadingType,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
+    TextButton(
         onClick = onClick,
-        modifier = modifier.width(160.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = readingType.emoji,
-                fontSize = 32.sp,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-            Text(
-                text = readingType.title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
-            )
-            Text(
-                text = readingType.description,
-                style = MaterialTheme.typography.bodySmall,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 4.dp)
-            )
-        }
-    }
-}
-
-@Composable
-fun DailyInsightCard(
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        colors = ButtonDefaults.textButtonColors(
+            contentColor = TextPrimary
         )
     ) {
-        Column(
-            modifier = Modifier.padding(20.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(bottom = 12.dp)
-            ) {
-                Text(
-                    text = "✨",
-                    fontSize = 24.sp,
-                    modifier = Modifier.padding(end = 8.dp)
-                )
-                Text(
-                    text = "Daily Insight",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                )
-            }
-            Text(
-                text = "\"Trust your intuition today. The universe is guiding you toward new opportunities.\"",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                repeat(5) { index ->
-                    Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = null,
-                        tint = if (index < 4) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun QuickActionsSection(
-    onNavigateToReading: (String) -> Unit,
-    onNavigateToHistory: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier) {
         Text(
-            text = "Quick Actions",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        Row(
+            text = text,
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Button(
-                onClick = { onNavigateToReading("quick") },
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Quick Reading")
-            }
-
-            OutlinedButton(
-                onClick = onNavigateToHistory,
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("View History")
-            }
-        }
+            textAlign = TextAlign.Start,
+            fontSize = 16.sp
+        )
     }
 }
-
-data class ReadingType(
-    val type: String,
-    val title: String,
-    val description: String,
-    val emoji: String
-)
-
-val readingTypes = listOf(
-    ReadingType(
-        type = "love",
-        title = "Love & Relationships",
-        description = "Explore matters of the heart",
-        emoji = "💕"
-    ),
-    ReadingType(
-        type = "career",
-        title = "Career & Money",
-        description = "Guidance for your professional path",
-        emoji = "💼"
-    ),
-    ReadingType(
-        type = "general",
-        title = "General Reading",
-        description = "Overall life guidance",
-        emoji = "🌟"
-    ),
-    ReadingType(
-        type = "spiritual",
-        title = "Spiritual Growth",
-        description = "Connect with your inner self",
-        emoji = "🧘"
-    )
-)
 
 @Preview(showBackground = true)
 @Composable
@@ -413,42 +377,17 @@ fun HomeScreenPreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Home Screen - Dark Theme")
+@Preview(showBackground = true, name = "Mystic Tarot Card")
 @Composable
-fun HomeScreenDarkPreview() {
-    TarotTheme(darkTheme = true) {
-        HomeScreen()
-    }
-}
-
-@Preview(showBackground = true, name = "Welcome Card")
-@Composable
-fun WelcomeCardPreview() {
+fun MysticTarotCardPreview() {
     TarotTheme {
-        WelcomeCard()
-    }
-}
-
-@Preview(showBackground = true, name = "Reading Type Card")
-@Composable
-fun ReadingTypeCardPreview() {
-    TarotTheme {
-        ReadingTypeCard(
-            readingType = ReadingType(
-                type = "love",
-                title = "Love & Relationships",
-                description = "Explore matters of the heart",
-                emoji = "💕"
-            ),
-            onClick = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, name = "Daily Insight Card")
-@Composable
-fun DailyInsightCardPreview() {
-    TarotTheme {
-        DailyInsightCard()
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MysticDarkBlue),
+            contentAlignment = Alignment.Center
+        ) {
+            MysticTarotCard()
+        }
     }
 }

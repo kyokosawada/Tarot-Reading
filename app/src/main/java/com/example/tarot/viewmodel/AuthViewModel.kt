@@ -2,18 +2,20 @@ package com.example.tarot.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.tarot.data.DummyAuthRepository
+import com.example.tarot.data.LoginResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import com.example.tarot.data.DummyAuthRepository
-import com.example.tarot.data.LoginResult
 
 data class AuthUiState(
     val isLoading: Boolean = false,
     val isLoggedIn: Boolean = false,
     val errorMessage: String? = null,
-    val user: User? = null
+    val user: User? = null,
+    val signupSuccess: Boolean = false,
+    val successMessage: String? = null
 )
 
 data class User(
@@ -114,7 +116,8 @@ class AuthViewModel : ViewModel() {
                     is LoginResult.Success -> {
                         _uiState.value = _uiState.value.copy(
                             isLoading = false,
-                            isLoggedIn = true,
+                            signupSuccess = true,
+                            successMessage = "Sign up successful! Please log in.",
                             user = result.user,
                             errorMessage = null
                         )
@@ -141,53 +144,10 @@ class AuthViewModel : ViewModel() {
         _uiState.value = AuthUiState() // Reset to initial state
     }
 
-    fun clearError() {
-        _uiState.value = _uiState.value.copy(errorMessage = null)
-    }
-
-    fun forgotPassword(email: String) {
-        viewModelScope.launch {
-            try {
-                _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
-
-                if (email.isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email)
-                        .matches()
-                ) {
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        errorMessage = "Please enter a valid email address"
-                    )
-                    return@launch
-                }
-
-                // Use dummy data repository for password reset
-                val success = authRepository.forgotPassword(email)
-                if (success) {
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        errorMessage = "Password reset link sent to your email"
-                    )
-                } else {
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        errorMessage = "Failed to send reset link"
-                    )
-                }
-
-            } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    errorMessage = "Failed to send reset link: ${e.message}"
-                )
-            }
-        }
-    }
-
-    /**
-     * Get test credentials hint for developers
-     * Useful for showing available test accounts
-     */
-    fun getTestCredentialsHint(): String {
-        return authRepository.getTestCredentialsHint()
+    fun clearMessages() {
+        _uiState.value = _uiState.value.copy(
+            errorMessage = null,
+            successMessage = null
+        )
     }
 }
