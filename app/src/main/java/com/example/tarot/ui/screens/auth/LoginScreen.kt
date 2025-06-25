@@ -44,14 +44,15 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.tarot.ui.theme.BackgroundEnd
-import com.example.tarot.ui.theme.BackgroundStart
 import com.example.tarot.ui.theme.ErrorRed
 import com.example.tarot.ui.theme.MysticCosmic
 import com.example.tarot.ui.theme.MysticDarkBlue
 import com.example.tarot.ui.theme.MysticGold
 import com.example.tarot.ui.theme.MysticNavy
 import com.example.tarot.ui.theme.MysticSilver
+import com.example.tarot.ui.theme.MysticaGradientEnd
+import com.example.tarot.ui.theme.MysticaGradientMid
+import com.example.tarot.ui.theme.MysticaGradientStart
 import com.example.tarot.ui.theme.TarotTheme
 import com.example.tarot.ui.theme.TextAccent
 import com.example.tarot.ui.theme.TextPrimary
@@ -64,6 +65,7 @@ fun LoginScreen(
     onLoginClick: (String, String) -> Unit = { _, _ -> },
     onSignUpClick: () -> Unit = {},
     onForgotPasswordClick: () -> Unit = {},
+    onGoogleSignInClick: () -> Unit = {},
     authUiState: AuthUiState? = null,
     modifier: Modifier = Modifier
 ) {
@@ -79,8 +81,9 @@ fun LoginScreen(
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        BackgroundStart,
-                        BackgroundEnd
+                        MysticaGradientStart,
+                        MysticaGradientMid,
+                        MysticaGradientEnd
                     )
                 )
             )
@@ -94,30 +97,53 @@ fun LoginScreen(
         ) {
             Spacer(modifier = Modifier.height(80.dp))
 
-            // MYSTICA Branding
+            // Enhanced MYSTICA Branding
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = "🔮",
-                    fontSize = 72.sp,
-                    modifier = Modifier.padding(bottom = 24.dp)
-                )
+                // Mystical Symbol Row
+                Row(
+                    modifier = Modifier.padding(bottom = 16.dp)
+                ) {
+                    Text(text = "✨", fontSize = 24.sp)
+                    Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+                    Text(text = "🔮", fontSize = 48.sp)
+                    Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+                    Text(text = "✨", fontSize = 24.sp)
+                }
 
                 Text(
                     text = "MYSTICA",
-                    fontSize = 36.sp,
+                    fontSize = 42.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextAccent,
-                    letterSpacing = 6.sp,
+                    letterSpacing = 8.sp,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+
+                // Mystical divider line
+                Text(
+                    text = "⟡ ◊ ⟡",
+                    fontSize = 16.sp,
+                    color = MysticGold,
+                    letterSpacing = 4.sp,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Text(
+                    text = "Ancient Wisdom • Modern Magic",
+                    fontSize = 14.sp,
+                    color = TextSecondary,
+                    letterSpacing = 2.sp,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
                 Text(
                     text = "Tarot & Divination",
                     fontSize = 16.sp,
-                    color = TextSecondary,
+                    color = MysticGold.copy(alpha = 0.8f),
                     letterSpacing = 3.sp,
+                    fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(bottom = 48.dp)
                 )
             }
@@ -325,6 +351,32 @@ fun LoginScreen(
                         HorizontalDivider(
                             modifier = Modifier.weight(1f),
                             color = MysticSilver.copy(alpha = 0.3f)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Google Sign-In Button
+                    OutlinedButton(
+                        onClick = onGoogleSignInClick,
+                        enabled = authUiState?.isLoading != true,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        border = ButtonDefaults.outlinedButtonBorder.copy(
+                            brush = Brush.horizontalGradient(
+                                colors = listOf(MysticGold, MysticSilver)
+                            )
+                        ),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = TextPrimary
+                        ),
+                        shape = RoundedCornerShape(28.dp)
+                    ) {
+                        Text(
+                            text = "Sign in with Google",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
                         )
                     }
 

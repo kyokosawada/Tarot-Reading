@@ -1,3 +1,28 @@
 <resources>
-    <string name="app_name">Tarot</string>
+    <!-- App Identity -->
+    <string name="app_name">MYSTICA</string>
+    <string name="app_name_full">MYSTICA - Tarot &amp; Divination</string>
+
+    <!-- Brand Taglines -->
+    <string name="brand_tagline_primary">Ancient Wisdom • Modern Magic</string>
+    <string name="brand_tagline_secondary">Tarot &amp; Divination</string>
+    <string name="brand_tagline_full">Where Ancient Wisdom Meets AI</string>
+
+    <!-- Mystical Elements -->
+    <string name="mystical_divider">⟡ ◊ ⟡</string>
+    <string name="mystical_symbols">✨ 🔮 ✨</string>
+    <string name="crystal_ball">🔮</string>
+    <string name="sparkles">✨</string>
+
+    <!-- App Description -->
+    <string name="app_description">Discover the mysteries of the universe with MYSTICA, your personal AI-powered tarot and divination companion.</string>
+    <string name="app_description_short">AI-Powered Tarot &amp; Divination</string>
+
+    <!-- Welcome Messages -->
+    <string name="welcome_to_mystica">Welcome to MYSTICA</string>
+    <string name="mystica_greeting">The universe awaits your questions</string>
+
+    <!-- Authentication -->
+    <string name="sign_in_to_mystica">Sign in to MYSTICA</string>
+    <string name="join_mystica">Join the MYSTICA Journey</string>
 </resources>

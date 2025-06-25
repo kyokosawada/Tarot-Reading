@@ -37,6 +37,7 @@ fun TarotNavigation(
 ) {
     val authUiState by authViewModel.uiState.collectAsState()
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Login) }
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     // Handle login success - navigate to home
     if (authUiState.isLoggedIn && currentScreen == Screen.Login) {
@@ -91,6 +92,10 @@ fun TarotNavigation(
                     onLoginClick = { email, password ->
                         authViewModel.clearMessages()
                         authViewModel.login(email, password)
+                    },
+                    onGoogleSignInClick = {
+                        authViewModel.clearMessages()
+                        authViewModel.signInWithGoogle(context)
                     },
                     onSignUpClick = {
                         authViewModel.clearMessages()
