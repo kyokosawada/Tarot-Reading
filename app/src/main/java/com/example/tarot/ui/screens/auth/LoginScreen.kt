@@ -1,6 +1,7 @@
 package com.example.tarot.ui.screens.auth
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,10 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
@@ -21,9 +20,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -41,20 +38,19 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.tarot.ui.components.MysticaLogoCompact
 import com.example.tarot.ui.theme.ErrorRed
-import com.example.tarot.ui.theme.MysticCosmic
 import com.example.tarot.ui.theme.MysticDarkBlue
 import com.example.tarot.ui.theme.MysticGold
-import com.example.tarot.ui.theme.MysticNavy
 import com.example.tarot.ui.theme.MysticSilver
 import com.example.tarot.ui.theme.MysticaGradientEnd
 import com.example.tarot.ui.theme.MysticaGradientMid
 import com.example.tarot.ui.theme.MysticaGradientStart
 import com.example.tarot.ui.theme.TarotTheme
-import com.example.tarot.ui.theme.TextAccent
 import com.example.tarot.ui.theme.TextPrimary
 import com.example.tarot.ui.theme.TextSecondary
 import com.example.tarot.viewmodel.AuthUiState
@@ -91,345 +87,230 @@ fun LoginScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(32.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(horizontal = 32.dp, vertical = 40.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Spacer(modifier = Modifier.height(80.dp))
-
-            // Enhanced MYSTICA Branding
+            // Top Section - Logo and Welcome
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(0.35f),
+                verticalArrangement = Arrangement.Center
             ) {
-                // Mystical Symbol Row
-                Row(
+                MysticaLogoCompact(
+                    logoSize = 100,
                     modifier = Modifier.padding(bottom = 16.dp)
-                ) {
-                    Text(text = "✨", fontSize = 24.sp)
-                    Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-                    Text(text = "🔮", fontSize = 48.sp)
-                    Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-                    Text(text = "✨", fontSize = 24.sp)
-                }
-
-                Text(
-                    text = "MYSTICA",
-                    fontSize = 42.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextAccent,
-                    letterSpacing = 8.sp,
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
-
-                // Mystical divider line
-                Text(
-                    text = "⟡ ◊ ⟡",
-                    fontSize = 16.sp,
-                    color = MysticGold,
-                    letterSpacing = 4.sp,
-                    modifier = Modifier.padding(bottom = 8.dp)
                 )
 
                 Text(
-                    text = "Ancient Wisdom • Modern Magic",
+                    text = "Welcome back to the mystical realm, dear seeker.",
                     fontSize = 14.sp,
-                    color = TextSecondary,
-                    letterSpacing = 2.sp,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-
-                Text(
-                    text = "Tarot & Divination",
-                    fontSize = 16.sp,
-                    color = MysticGold.copy(alpha = 0.8f),
-                    letterSpacing = 3.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(bottom = 48.dp)
+                    color = TextSecondary.copy(alpha = 0.8f),
+                    textAlign = TextAlign.Center,
+                    lineHeight = 20.sp,
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
 
-            // Error Message
-            authUiState?.errorMessage?.let { errorMessage ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = ErrorRed.copy(alpha = 0.1f)
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text(
-                        text = errorMessage,
-                        color = ErrorRed,
-                        fontSize = 14.sp,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-            }
-
-            // Success Message
-            authUiState?.successMessage?.let { successMessage ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MysticGold.copy(alpha = 0.1f)
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text(
-                        text = successMessage,
-                        color = MysticGold,
-                        fontSize = 14.sp,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-            }
-
-            // Login Form Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MysticNavy.copy(alpha = 0.9f)
-                ),
-                shape = RoundedCornerShape(20.dp)
+            // Middle Section - Login Form
+            Column(
+                modifier = Modifier.weight(0.5f),
+                verticalArrangement = Arrangement.Center
             ) {
-                Column(
-                    modifier = Modifier.padding(24.dp)
-                ) {
-                    // Email Field
-                    OutlinedTextField(
-                        value = email,
-                        onValueChange = {
-                            email = it
-                            isEmailError = false
-                        },
-                        label = { Text("Email", color = TextSecondary) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Email,
-                                contentDescription = "Email Icon",
-                                tint = MysticGold
-                            )
-                        },
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Email,
-                            imeAction = ImeAction.Next
-                        ),
-                        isError = isEmailError,
-                        enabled = authUiState?.isLoading != true,
-                        supportingText = if (isEmailError) {
-                            { Text("Please enter a valid email", color = ErrorRed) }
-                        } else null,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MysticGold,
-                            unfocusedBorderColor = MysticSilver,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary,
-                            cursorColor = MysticGold
-                        ),
+                // Error Message
+                authUiState?.errorMessage?.let { errorMessage ->
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 16.dp)
-                    )
-
-                    // Password Field
-                    OutlinedTextField(
-                        value = password,
-                        onValueChange = {
-                            password = it
-                            isPasswordError = false
-                        },
-                        label = { Text("Password", color = TextSecondary) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Lock,
-                                contentDescription = "Password Icon",
-                                tint = MysticGold
-                            )
-                        },
-                        trailingIcon = {
-                            TextButton(onClick = { passwordVisible = !passwordVisible }) {
-                                Text(
-                                    text = if (passwordVisible) "Hide" else "Show",
-                                    color = MysticGold,
-                                    fontSize = 12.sp
-                                )
-                            }
-                        },
-                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Password,
-                            imeAction = ImeAction.Done
+                            .padding(bottom = 16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = ErrorRed.copy(alpha = 0.1f)
                         ),
-                        isError = isPasswordError,
-                        enabled = authUiState?.isLoading != true,
-                        supportingText = if (isPasswordError) {
-                            { Text("Password is required", color = ErrorRed) }
-                        } else null,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MysticGold,
-                            unfocusedBorderColor = MysticSilver,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary,
-                            cursorColor = MysticGold
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp)
-                    )
-
-                    // Forgot Password
-                    TextButton(
-                        onClick = onForgotPasswordClick,
-                        enabled = authUiState?.isLoading != true,
-                        modifier = Modifier.align(Alignment.End)
+                        shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(
-                            "Forgot Password?",
-                            color = MysticSilver,
-                            fontSize = 14.sp
+                            text = errorMessage,
+                            color = ErrorRed,
+                            fontSize = 13.sp,
+                            modifier = Modifier.padding(12.dp)
                         )
                     }
+                }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                // Email Field
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = {
+                        email = it
+                        isEmailError = false
+                    },
+                    label = { Text("Email", color = TextSecondary) },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Email,
+                            contentDescription = "Email Icon",
+                            tint = MysticGold
+                        )
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next
+                    ),
+                    isError = isEmailError,
+                    enabled = authUiState?.isLoading != true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MysticGold,
+                        unfocusedBorderColor = MysticSilver.copy(alpha = 0.6f),
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        cursorColor = MysticGold
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                )
 
-                    // Login Button
-                    Button(
-                        onClick = {
-                            when {
-                                email.isBlank() -> isEmailError = true
-                                password.isBlank() -> isPasswordError = true
-                                else -> onLoginClick(email, password)
-                            }
-                        },
-                        enabled = authUiState?.isLoading != true,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MysticGold,
-                            contentColor = MysticDarkBlue
-                        ),
-                        shape = RoundedCornerShape(28.dp)
-                    ) {
-                        if (authUiState?.isLoading == true) {
+                // Password Field
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = {
+                        password = it
+                        isPasswordError = false
+                    },
+                    label = { Text("Password", color = TextSecondary) },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Lock,
+                            contentDescription = "Password Icon",
+                            tint = MysticGold
+                        )
+                    },
+                    trailingIcon = {
+                        TextButton(onClick = { passwordVisible = !passwordVisible }) {
                             Text(
-                                text = "Signing In...",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        } else {
-                            Text(
-                                text = "Sign In",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.SemiBold
+                                text = if (passwordVisible) "Hide" else "Show",
+                                color = MysticGold,
+                                fontSize = 11.sp
                             )
                         }
-                    }
+                    },
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done
+                    ),
+                    isError = isPasswordError,
+                    enabled = authUiState?.isLoading != true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MysticGold,
+                        unfocusedBorderColor = MysticSilver.copy(alpha = 0.6f),
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        cursorColor = MysticGold
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 24.dp)
+                )
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Divider
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        HorizontalDivider(
-                            modifier = Modifier.weight(1f),
-                            color = MysticSilver.copy(alpha = 0.3f)
-                        )
+                // Login Button
+                Button(
+                    onClick = {
+                        when {
+                            email.isBlank() -> isEmailError = true
+                            password.isBlank() -> isPasswordError = true
+                            else -> onLoginClick(email, password)
+                        }
+                    },
+                    enabled = authUiState?.isLoading != true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(54.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MysticGold,
+                        contentColor = MysticDarkBlue
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    if (authUiState?.isLoading == true) {
                         Text(
-                            text = "OR",
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            color = TextSecondary,
-                            fontSize = 12.sp,
-                            letterSpacing = 2.sp
+                            text = "SIGNING IN...",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
                         )
-                        HorizontalDivider(
-                            modifier = Modifier.weight(1f),
-                            color = MysticSilver.copy(alpha = 0.3f)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Google Sign-In Button
-                    OutlinedButton(
-                        onClick = onGoogleSignInClick,
-                        enabled = authUiState?.isLoading != true,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        border = ButtonDefaults.outlinedButtonBorder.copy(
-                            brush = Brush.horizontalGradient(
-                                colors = listOf(MysticGold, MysticSilver)
-                            )
-                        ),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = TextPrimary
-                        ),
-                        shape = RoundedCornerShape(28.dp)
-                    ) {
+                    } else {
                         Text(
-                            text = "Sign in with Google",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Sign Up Button
-                    OutlinedButton(
-                        onClick = onSignUpClick,
-                        enabled = authUiState?.isLoading != true,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        border = ButtonDefaults.outlinedButtonBorder.copy(
-                            brush = Brush.horizontalGradient(
-                                colors = listOf(MysticGold, MysticSilver)
-                            )
-                        ),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = TextPrimary
-                        ),
-                        shape = RoundedCornerShape(28.dp)
-                    ) {
-                        Text(
-                            text = "Create Account",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
+                            text = "LOG IN",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
                         )
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-            // Test Accounts Info
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MysticCosmic.copy(alpha = 0.3f)
-                ),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
+                // Forgot Password
+                TextButton(
+                    onClick = onForgotPasswordClick,
+                    enabled = authUiState?.isLoading != true,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
                 ) {
                     Text(
-                        text = "Test Account: test@test.com / test",
-                        fontSize = 12.sp,
-                        color = TextSecondary
+                        "FORGOT PASSWORD",
+                        color = MysticGold.copy(alpha = 0.8f),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
+                        letterSpacing = 1.sp
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            // Bottom Section - Sign Up Link
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(0.15f),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Don't have an account? ",
+                        fontSize = 14.sp,
+                        color = TextSecondary
+                    )
+                    TextButton(
+                        onClick = onSignUpClick,
+                        enabled = authUiState?.isLoading != true
+                    ) {
+                        Text(
+                            text = "Sign Up",
+                            color = TextPrimary,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+
+                // Optional Google Sign-in as subtle link
+                if (onGoogleSignInClick != {}) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    TextButton(
+                        onClick = onGoogleSignInClick,
+                        enabled = authUiState?.isLoading != true
+                    ) {
+                        Text(
+                            text = "Continue with Google",
+                            color = MysticSilver.copy(alpha = 0.7f),
+                            fontSize = 12.sp
+                        )
+                    }
+                }
+            }
         }
     }
 }

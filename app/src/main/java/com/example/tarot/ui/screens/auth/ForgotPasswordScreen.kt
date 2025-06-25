@@ -44,13 +44,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.tarot.ui.theme.BackgroundEnd
-import com.example.tarot.ui.theme.BackgroundStart
+import com.example.tarot.ui.components.MysticaLogoCompact
 import com.example.tarot.ui.theme.ErrorRed
 import com.example.tarot.ui.theme.MysticDarkBlue
 import com.example.tarot.ui.theme.MysticGold
 import com.example.tarot.ui.theme.MysticNavy
 import com.example.tarot.ui.theme.MysticSilver
+import com.example.tarot.ui.theme.MysticaGradientEnd
+import com.example.tarot.ui.theme.MysticaGradientMid
+import com.example.tarot.ui.theme.MysticaGradientStart
 import com.example.tarot.ui.theme.TarotTheme
 import com.example.tarot.ui.theme.TextAccent
 import com.example.tarot.ui.theme.TextPrimary
@@ -111,8 +113,9 @@ fun ForgotPasswordScreen(
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            BackgroundStart,
-                            BackgroundEnd
+                            MysticaGradientStart,
+                            MysticaGradientMid,
+                            MysticaGradientEnd
                         )
                     )
                 )
@@ -175,26 +178,16 @@ private fun ResetPasswordContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // MYSTICA Branding
-        Text(
-            text = "🔮",
-            fontSize = 72.sp,
-            modifier = Modifier.padding(bottom = 24.dp)
-        )
-
-        Text(
-            text = "MYSTICA",
-            fontSize = 36.sp,
-            fontWeight = FontWeight.Bold,
-            color = TextAccent,
-            letterSpacing = 6.sp,
-            modifier = Modifier.padding(bottom = 8.dp)
+        MysticaLogoCompact(
+            modifier = Modifier.padding(bottom = 32.dp)
         )
 
         Text(
             text = "Password Recovery",
-            fontSize = 16.sp,
-            color = TextSecondary,
+            fontSize = 18.sp,
+            color = MysticGold,
             letterSpacing = 3.sp,
+            fontWeight = FontWeight.Medium,
             modifier = Modifier.padding(bottom = 48.dp)
         )
 

@@ -1,6 +1,8 @@
 package com.example.tarot.ui.screens.auth
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -17,12 +20,16 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -32,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -41,7 +49,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.tarot.ui.components.MysticaLogoCompact
+import com.example.tarot.ui.theme.MysticDarkBlue
+import com.example.tarot.ui.theme.MysticGold
+import com.example.tarot.ui.theme.MysticNavy
+import com.example.tarot.ui.theme.MysticSilver
+import com.example.tarot.ui.theme.MysticaGradientEnd
+import com.example.tarot.ui.theme.MysticaGradientMid
+import com.example.tarot.ui.theme.MysticaGradientStart
 import com.example.tarot.ui.theme.TarotTheme
+import com.example.tarot.ui.theme.TextPrimary
+import com.example.tarot.ui.theme.TextSecondary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,37 +82,60 @@ fun SignUpScreen(
     var isConfirmPasswordError by remember { mutableStateOf(false) }
     var passwordMismatch by remember { mutableStateOf(false) }
 
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
-            .padding(24.dp)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        MysticaGradientStart,
+                        MysticaGradientMid,
+                        MysticaGradientEnd
+                    )
+                )
+            )
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
         Spacer(modifier = Modifier.height(32.dp))
 
         // App Logo/Title
-        Text(
-            text = "🔮",
-            fontSize = 48.sp,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+            // App Logo with MYSTICA branding
+            MysticaLogoCompact(
+                modifier = Modifier.padding(bottom = 32.dp)
+            )
 
-        Text(
-            text = "Create Account",
-            style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
+            // Sign Up Form Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MysticNavy.copy(alpha = 0.9f)
+                ),
+                shape = RoundedCornerShape(20.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp)
+                ) {
+                    Text(
+                        text = "Create Account",
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MysticGold,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
 
-        Text(
-            text = "Join the mystical journey",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(bottom = 32.dp)
-        )
+                    Text(
+                        text = "Join the mystical journey",
+                        fontSize = 16.sp,
+                        color = TextSecondary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(bottom = 32.dp)
+                    )
 
         // Full Name Field
         OutlinedTextField(
@@ -103,11 +144,12 @@ fun SignUpScreen(
                 fullName = it
                 isNameError = false
             },
-            label = { Text("Full Name") },
+            label = { Text("Full Name", color = TextSecondary) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Person,
-                    contentDescription = "Name Icon"
+                    contentDescription = "Name Icon",
+                    tint = MysticGold
                 )
             },
             keyboardOptions = KeyboardOptions(
@@ -116,8 +158,15 @@ fun SignUpScreen(
             ),
             isError = isNameError,
             supportingText = if (isNameError) {
-                { Text("Please enter your full name") }
+                { Text("Please enter your full name", color = MaterialTheme.colorScheme.error) }
             } else null,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MysticGold,
+                unfocusedBorderColor = MysticSilver,
+                focusedTextColor = TextPrimary,
+                unfocusedTextColor = TextPrimary,
+                cursorColor = MysticGold
+            ),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
@@ -130,11 +179,12 @@ fun SignUpScreen(
                 email = it
                 isEmailError = false
             },
-            label = { Text("Email") },
+            label = { Text("Email", color = TextSecondary) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Email,
-                    contentDescription = "Email Icon"
+                    contentDescription = "Email Icon",
+                    tint = MysticGold
                 )
             },
             keyboardOptions = KeyboardOptions(
@@ -143,8 +193,15 @@ fun SignUpScreen(
             ),
             isError = isEmailError,
             supportingText = if (isEmailError) {
-                { Text("Please enter a valid email") }
+                { Text("Please enter a valid email", color = MaterialTheme.colorScheme.error) }
             } else null,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MysticGold,
+                unfocusedBorderColor = MysticSilver,
+                focusedTextColor = TextPrimary,
+                unfocusedTextColor = TextPrimary,
+                cursorColor = MysticGold
+            ),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
@@ -158,18 +215,20 @@ fun SignUpScreen(
                 isPasswordError = false
                 passwordMismatch = false
             },
-            label = { Text("Password") },
+            label = { Text("Password", color = TextSecondary) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Lock,
-                    contentDescription = "Password Icon"
+                    contentDescription = "Password Icon",
+                    tint = MysticGold
                 )
             },
             trailingIcon = {
-                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                TextButton(onClick = { passwordVisible = !passwordVisible }) {
                     Text(
                         text = if (passwordVisible) "Hide" else "Show",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MysticGold,
+                        fontSize = 12.sp
                     )
                 }
             },
@@ -180,8 +239,20 @@ fun SignUpScreen(
             ),
             isError = isPasswordError,
             supportingText = if (isPasswordError) {
-                { Text("Password must be at least 6 characters") }
+                {
+                    Text(
+                        "Password must be at least 6 characters",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
             } else null,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MysticGold,
+                unfocusedBorderColor = MysticSilver,
+                focusedTextColor = TextPrimary,
+                unfocusedTextColor = TextPrimary,
+                cursorColor = MysticGold
+            ),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
@@ -195,18 +266,20 @@ fun SignUpScreen(
                 isConfirmPasswordError = false
                 passwordMismatch = false
             },
-            label = { Text("Confirm Password") },
+            label = { Text("Confirm Password", color = TextSecondary) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Lock,
-                    contentDescription = "Confirm Password Icon"
+                    contentDescription = "Confirm Password Icon",
+                    tint = MysticGold
                 )
             },
             trailingIcon = {
-                IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                TextButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
                     Text(
                         text = if (confirmPasswordVisible) "Hide" else "Show",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MysticGold,
+                        fontSize = 12.sp
                     )
                 }
             },
@@ -217,10 +290,17 @@ fun SignUpScreen(
             ),
             isError = isConfirmPasswordError || passwordMismatch,
             supportingText = if (isConfirmPasswordError) {
-                { Text("Please confirm your password") }
+                { Text("Please confirm your password", color = MaterialTheme.colorScheme.error) }
             } else if (passwordMismatch) {
-                { Text("Passwords do not match") }
+                { Text("Passwords do not match", color = MaterialTheme.colorScheme.error) }
             } else null,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MysticGold,
+                unfocusedBorderColor = MysticSilver,
+                focusedTextColor = TextPrimary,
+                unfocusedTextColor = TextPrimary,
+                cursorColor = MysticGold
+            ),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
@@ -235,13 +315,18 @@ fun SignUpScreen(
         ) {
             Checkbox(
                 checked = acceptTerms,
-                onCheckedChange = { acceptTerms = it }
+                onCheckedChange = { acceptTerms = it },
+                colors = CheckboxDefaults.colors(
+                    checkedColor = MysticGold,
+                    uncheckedColor = MysticSilver,
+                    checkmarkColor = MysticDarkBlue
+                )
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = "I agree to the Terms of Service and Privacy Policy",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                fontSize = 14.sp,
+                color = TextSecondary
             )
         }
 
@@ -280,11 +365,16 @@ fun SignUpScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
-            shape = MaterialTheme.shapes.medium
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MysticGold,
+                contentColor = MysticDarkBlue
+            ),
+            shape = RoundedCornerShape(28.dp)
         ) {
             Text(
                 text = "Create Account",
-                style = MaterialTheme.typography.titleMedium
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
             )
         }
 
@@ -298,15 +388,22 @@ fun SignUpScreen(
         ) {
             Text(
                 text = "Already have an account? ",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                fontSize = 14.sp,
+                color = TextSecondary
             )
             TextButton(onClick = onSignInClick) {
-                Text("Sign In")
+                Text(
+                    text = "Sign In",
+                    color = MysticGold,
+                    fontWeight = FontWeight.Medium
+                )
             }
         }
+                }
+            }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(32.dp))
+        }
     }
 }
 

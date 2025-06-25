@@ -43,7 +43,7 @@ class AuthViewModel : ViewModel() {
     // Dummy data repository for testing
     private val authRepository = DummyAuthRepository()
 
-    // Your web client ID from Firebase Console
+    // Web client ID from Firebase Console
     private val webClientId =
         "972003711031-4o27g7sjiet4kqq1l12j15ig0ji36ik3.apps.googleusercontent.com"
 

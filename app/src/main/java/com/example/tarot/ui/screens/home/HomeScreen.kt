@@ -42,8 +42,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.tarot.ui.theme.BackgroundEnd
-import com.example.tarot.ui.theme.BackgroundStart
+import com.example.tarot.ui.components.MysticaLogoCompact
 import com.example.tarot.ui.theme.CardBack
 import com.example.tarot.ui.theme.CardBorder
 import com.example.tarot.ui.theme.CardGlow
@@ -53,6 +52,9 @@ import com.example.tarot.ui.theme.MysticGold
 import com.example.tarot.ui.theme.MysticNavy
 import com.example.tarot.ui.theme.MysticPurple
 import com.example.tarot.ui.theme.MysticSilver
+import com.example.tarot.ui.theme.MysticaGradientEnd
+import com.example.tarot.ui.theme.MysticaGradientMid
+import com.example.tarot.ui.theme.MysticaGradientStart
 import com.example.tarot.ui.theme.TarotTheme
 import com.example.tarot.ui.theme.TextAccent
 import com.example.tarot.ui.theme.TextPrimary
@@ -137,8 +139,9 @@ fun HomeScreen(
                     .background(
                         brush = Brush.verticalGradient(
                             colors = listOf(
-                                BackgroundStart,
-                                BackgroundEnd
+                                MysticaGradientStart,
+                                MysticaGradientMid,
+                                MysticaGradientEnd
                             )
                         )
                     )
@@ -290,7 +293,7 @@ fun MysticNavigationDrawer(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp)
+                    .height(140.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(
                         brush = Brush.verticalGradient(
@@ -299,24 +302,13 @@ fun MysticNavigationDrawer(
                                 MysticCosmic
                             )
                         )
-                    ),
+                    )
+                    .padding(16.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "🔮",
-                        fontSize = 32.sp
-                    )
-                    Text(
-                        text = "MYSTICA",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextAccent,
-                        letterSpacing = 2.sp
-                    )
-                }
+                MysticaLogoCompact(
+                    logoSize = 60
+                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))

@@ -14,11 +14,10 @@ val Typography = Typography(
         fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.5.sp
-    )
-    /* Other default text styles to override
+    ),
     titleLarge = TextStyle(
         fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
+        fontWeight = FontWeight.Bold,
         fontSize = 22.sp,
         lineHeight = 28.sp,
         letterSpacing = 0.sp
@@ -30,5 +29,29 @@ val Typography = Typography(
         lineHeight = 16.sp,
         letterSpacing = 0.5.sp
     )
-    */
+)
+
+// Mystical Brand Typography
+val MysticaBrandStyle = TextStyle(
+    fontFamily = FontFamily.Serif,
+    fontWeight = FontWeight.Bold,
+    fontSize = 42.sp,
+    letterSpacing = 8.sp,
+    lineHeight = 48.sp
+)
+
+val MysticaSubtitleStyle = TextStyle(
+    fontFamily = FontFamily.Serif,
+    fontWeight = FontWeight.Medium,
+    fontSize = 16.sp,
+    letterSpacing = 3.sp,
+    lineHeight = 20.sp
+)
+
+val MysticaTaglineStyle = TextStyle(
+    fontFamily = FontFamily.Default,
+    fontWeight = FontWeight.Normal,
+    fontSize = 14.sp,
+    letterSpacing = 2.sp,
+    lineHeight = 18.sp
 )
