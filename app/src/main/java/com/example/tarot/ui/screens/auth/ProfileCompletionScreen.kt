@@ -17,6 +17,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -62,10 +63,11 @@ import com.example.tarot.viewmodel.AuthUiState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileCompletionScreen(
-    onCompleteProfile: (Int, Int) -> Unit = { _, _ -> },
+    onCompleteProfile: (String, Int, Int) -> Unit = { _, _, _ -> },
     authUiState: AuthUiState? = null,
     modifier: Modifier = Modifier
 ) {
+    var username by remember { mutableStateOf("") }
     var selectedMonth by remember { mutableStateOf("") }
     var selectedYear by remember { mutableStateOf("") }
     var monthExpanded by remember { mutableStateOf(false) }
@@ -150,6 +152,40 @@ fun ProfileCompletionScreen(
                             )
                         }
                     }
+
+                    // Username Field
+                    OutlinedTextField(
+                        value = username,
+                        onValueChange = { username = it },
+                        label = { Text("Username", color = TextSecondary) },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Filled.Person,
+                                contentDescription = "Username Icon",
+                                tint = MysticGold
+                            )
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text,
+                            imeAction = ImeAction.Next
+                        ),
+                        placeholder = {
+                            Text(
+                                "e.g., mystictraveler",
+                                color = TextSecondary.copy(alpha = 0.6f)
+                            )
+                        },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MysticGold,
+                            unfocusedBorderColor = MysticSilver,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            cursorColor = MysticGold
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp)
+                    )
 
                     // Birth Month Dropdown
                     ExposedDropdownMenuBox(
@@ -247,10 +283,10 @@ fun ProfileCompletionScreen(
                             val year = selectedYear.toIntOrNull()
 
                             if (monthNumber != null && year != null) {
-                                onCompleteProfile(monthNumber, year)
+                                onCompleteProfile(username, monthNumber, year)
                             }
                         },
-                        enabled = selectedMonth.isNotBlank() &&
+                        enabled = username.isNotBlank() && selectedMonth.isNotBlank() &&
                                 selectedYear.isNotBlank() &&
                                 authUiState?.isLoading != true,
                         modifier = Modifier

@@ -1,16 +1,22 @@
 package com.example.tarot.navigation
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.tarot.ui.screens.auth.ForgotPasswordScreen
 import com.example.tarot.ui.screens.auth.LoginScreen
 import com.example.tarot.ui.screens.auth.ProfileCompletionScreen
@@ -21,92 +27,98 @@ import com.example.tarot.ui.screens.reading.AskQuestionScreen
 import com.example.tarot.ui.screens.reading.DailyReadingScreen
 import com.example.tarot.viewmodel.AuthViewModel
 
-sealed class Screen {
-    object Login : Screen()
-    object SignUp : Screen()
-    object ForgotPassword : Screen()
-    object ProfileCompletion : Screen()
-    object Home : Screen()
-    object Profile : Screen()
-    object DailyReading : Screen()
-    object AskQuestion : Screen()
-    // object History : Screen() // Reserved for future implementation
+// Navigation routes
+object Routes {
+    const val LOGIN = "login"
+    const val SIGN_UP = "signup"
+    const val FORGOT_PASSWORD = "forgot_password"
+    const val PROFILE_COMPLETION = "profile_completion"
+    const val HOME = "home"
+    const val PROFILE = "profile"
+    const val DAILY_READING = "daily_reading"
+    const val ASK_QUESTION = "ask_question"
 }
+
+// Animation constants
+private const val ANIMATION_DURATION = 400
+private const val FADE_DURATION = 200
 
 @Composable
 fun TarotNavigation(
     authViewModel: AuthViewModel
 ) {
     val authUiState by authViewModel.uiState.collectAsState()
-    var currentScreen by remember { mutableStateOf<Screen>(Screen.Login) }
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val navController = rememberNavController()
+    val context = LocalContext.current
 
-    // Handle login success - navigate to home
-    if (authUiState.isLoggedIn && currentScreen == Screen.Login) {
-        // Check if profile completion is needed (for Google sign-in users)
-        currentScreen = if (authUiState.needsProfileCompletion) {
-            Screen.ProfileCompletion
-        } else {
-            Screen.Home
-        }
-    }
-
-    // Handle profile completion success - navigate to home
-    if (authUiState.isLoggedIn && !authUiState.needsProfileCompletion && currentScreen == Screen.ProfileCompletion) {
-        currentScreen = Screen.Home
-    }
-
-    // Handle signup success - navigate to login
-    if (authUiState.signupSuccess && currentScreen == Screen.SignUp) {
-        currentScreen = Screen.Login
-    }
-
-    // Handle logout
-    if (!authUiState.isLoggedIn && currentScreen !in listOf(
-            Screen.Login,
-            Screen.SignUp,
-            Screen.ForgotPassword,
-            Screen.ProfileCompletion
-        )
+    // Handle authentication state changes
+    LaunchedEffect(
+        authUiState.isLoggedIn,
+        authUiState.needsProfileCompletion,
+        authUiState.signupSuccess
     ) {
-        currentScreen = Screen.Login
-    }
-
-    // Handle Android back button properly
-    when (currentScreen) {
-        Screen.SignUp, Screen.ForgotPassword -> {
-            BackHandler {
-                currentScreen = Screen.Login
+        when {
+            authUiState.signupSuccess -> {
+                navController.navigate(Routes.LOGIN) {
+                    popUpTo(Routes.SIGN_UP) { inclusive = true }
+                }
             }
-        }
-        Screen.ProfileCompletion -> {
-            BackHandler {
-                // Don't allow back navigation from profile completion
-                // User must complete profile to continue
+            authUiState.isLoggedIn && authUiState.needsProfileCompletion -> {
+                navController.navigate(Routes.PROFILE_COMPLETION) {
+                    popUpTo(Routes.LOGIN) { inclusive = true }
+                }
             }
-        }
-        Screen.Profile, Screen.DailyReading, Screen.AskQuestion -> {
-            BackHandler {
-                currentScreen = Screen.Home
+            authUiState.isLoggedIn && !authUiState.needsProfileCompletion -> {
+                val currentRoute = navController.currentBackStackEntry?.destination?.route
+                if (currentRoute == Routes.LOGIN || currentRoute == Routes.PROFILE_COMPLETION) {
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(0) { inclusive = true } // Clear entire back stack
+                    }
+                }
             }
-        }
-        Screen.Home -> {
-            BackHandler {
-                // Allow back press to minimize app instead of closing
-                // This is the root screen for logged-in users
+            !authUiState.isLoggedIn -> {
+                val currentRoute = navController.currentBackStackEntry?.destination?.route
+                if (currentRoute !in listOf(Routes.LOGIN, Routes.SIGN_UP, Routes.FORGOT_PASSWORD)) {
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
             }
-        }
-
-        Screen.Login -> {
-            // Allow back press to minimize app on login screen
         }
     }
 
     Scaffold(
         modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
-        when (currentScreen) {
-            is Screen.Login -> {
+        NavHost(
+            navController = navController,
+            startDestination = Routes.LOGIN,
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            // Auth screens with horizontal slide animations
+            composable(
+                route = Routes.LOGIN,
+                enterTransition = {
+                    when (initialState.destination.route) {
+                        Routes.SIGN_UP, Routes.FORGOT_PASSWORD -> slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Right,
+                            animationSpec = tween(ANIMATION_DURATION)
+                        )
+
+                        else -> fadeIn(animationSpec = tween(FADE_DURATION))
+                    }
+                },
+                exitTransition = {
+                    when (targetState.destination.route) {
+                        Routes.SIGN_UP, Routes.FORGOT_PASSWORD -> slideOutOfContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Left,
+                            animationSpec = tween(ANIMATION_DURATION)
+                        )
+
+                        else -> fadeOut(animationSpec = tween(FADE_DURATION))
+                    }
+                }
+            ) {
                 LoginScreen(
                     onLoginClick = { email, password ->
                         authViewModel.clearMessages()
@@ -118,81 +130,169 @@ fun TarotNavigation(
                     },
                     onSignUpClick = {
                         authViewModel.clearMessages()
-                        currentScreen = Screen.SignUp
+                        navController.navigate(Routes.SIGN_UP)
                     },
                     onForgotPasswordClick = {
                         authViewModel.clearMessages()
-                        currentScreen = Screen.ForgotPassword
+                        navController.navigate(Routes.FORGOT_PASSWORD)
                     },
-                    authUiState = authUiState,
-                    modifier = Modifier.padding(innerPadding)
+                    authUiState = authUiState
                 )
             }
 
-            is Screen.SignUp -> {
+            composable(
+                route = Routes.SIGN_UP,
+                enterTransition = {
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Left,
+                        animationSpec = tween(ANIMATION_DURATION)
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(ANIMATION_DURATION)
+                    )
+                }
+            ) {
                 SignUpScreen(
                     onSignUpClick = { name, email, password, month, year ->
                         authViewModel.signUp(name, email, password, month, year)
                     },
                     onSignInClick = {
                         authViewModel.clearMessages()
-                        currentScreen = Screen.Login
-                    },
-                    modifier = Modifier.padding(innerPadding)
+                        navController.popBackStack()
+                    }
                 )
+
+                // Handle back press
+                BackHandler {
+                    navController.popBackStack()
+                }
             }
 
-            is Screen.ForgotPassword -> {
+            composable(
+                route = Routes.FORGOT_PASSWORD,
+                enterTransition = {
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Left,
+                        animationSpec = tween(ANIMATION_DURATION)
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(ANIMATION_DURATION)
+                    )
+                }
+            ) {
                 ForgotPasswordScreen(
                     onBackClick = {
                         authViewModel.clearMessages()
-                        currentScreen = Screen.Login
+                        navController.popBackStack()
                     },
                     onResetPasswordClick = { email ->
-                        // Handle password reset - for now just go back to login
                         authViewModel.clearMessages()
-                        currentScreen = Screen.Login
+                        navController.popBackStack()
                     },
                     onSuccessNavigation = {
                         authViewModel.clearMessages()
-                        currentScreen = Screen.Login
-                    },
-                    modifier = Modifier.padding(innerPadding)
+                        navController.popBackStack()
+                    }
                 )
+
+                // Handle back press
+                BackHandler {
+                    navController.popBackStack()
+                }
             }
 
-            is Screen.ProfileCompletion -> {
+            composable(
+                route = Routes.PROFILE_COMPLETION,
+                enterTransition = {
+                    fadeIn(animationSpec = tween(FADE_DURATION))
+                },
+                exitTransition = {
+                    fadeOut(animationSpec = tween(FADE_DURATION))
+                }
+            ) {
                 ProfileCompletionScreen(
-                    onCompleteProfile = { month, year ->
-                        authViewModel.completeProfile(month, year)
+                    onCompleteProfile = { username, month, year ->
+                        authViewModel.completeProfile(username, month, year)
                     },
-                    authUiState = authUiState,
-                    modifier = Modifier.padding(innerPadding)
+                    authUiState = authUiState
                 )
+
+                // Prevent back navigation from profile completion
+                BackHandler {
+                    // Do nothing - user must complete profile
+                }
             }
 
-            is Screen.Home -> {
+            // Main app screens with vertical slide animations
+            composable(
+                route = Routes.HOME,
+                enterTransition = {
+                    when (initialState.destination.route) {
+                        Routes.PROFILE, Routes.DAILY_READING, Routes.ASK_QUESTION -> slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Right,
+                            animationSpec = tween(ANIMATION_DURATION)
+                        )
+
+                        else -> fadeIn(animationSpec = tween(FADE_DURATION))
+                    }
+                },
+                exitTransition = {
+                    when (targetState.destination.route) {
+                        Routes.PROFILE -> slideOutOfContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Up,
+                            animationSpec = tween(ANIMATION_DURATION)
+                        )
+
+                        Routes.DAILY_READING, Routes.ASK_QUESTION -> slideOutOfContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Left,
+                            animationSpec = tween(ANIMATION_DURATION)
+                        )
+
+                        else -> fadeOut(animationSpec = tween(FADE_DURATION))
+                    }
+                }
+            ) {
                 HomeScreen(
                     onNavigateToReading = { readingType ->
-                        currentScreen = when (readingType) {
-                            "daily" -> Screen.DailyReading
-                            "question" -> Screen.AskQuestion
-                            else -> Screen.DailyReading
+                        val route = when (readingType) {
+                            "daily" -> Routes.DAILY_READING
+                            "question" -> Routes.ASK_QUESTION
+                            else -> Routes.DAILY_READING
                         }
+                        navController.navigate(route)
                     },
                     onNavigateToProfile = {
                         authViewModel.clearMessages()
-                        currentScreen = Screen.Profile
-                    },
-                    modifier = Modifier.padding(innerPadding)
+                        navController.navigate(Routes.PROFILE)
+                    }
                 )
             }
 
-            is Screen.Profile -> {
+            composable(
+                route = Routes.PROFILE,
+                enterTransition = {
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Down,
+                        animationSpec = tween(ANIMATION_DURATION)
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Up,
+                        animationSpec = tween(ANIMATION_DURATION)
+                    )
+                }
+            ) {
                 ProfileScreen(
                     onBackClick = {
                         authViewModel.clearMessages()
-                        currentScreen = Screen.Home
+                        navController.popBackStack()
                     },
                     onEditProfileClick = {
                         // Handle edit profile
@@ -200,29 +300,69 @@ fun TarotNavigation(
                     onLogoutClick = {
                         authViewModel.clearMessages()
                         authViewModel.logout()
-                    },
-                    modifier = Modifier.padding(innerPadding)
+                    }
                 )
+
+                // Handle back press
+                BackHandler {
+                    navController.popBackStack()
+                }
             }
 
-            is Screen.DailyReading -> {
+            composable(
+                route = Routes.DAILY_READING,
+                enterTransition = {
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Left,
+                        animationSpec = tween(ANIMATION_DURATION)
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(ANIMATION_DURATION)
+                    )
+                }
+            ) {
                 DailyReadingScreen(
                     onBackClick = {
                         authViewModel.clearMessages()
-                        currentScreen = Screen.Home
-                    },
-                    modifier = Modifier.padding(innerPadding)
+                        navController.popBackStack()
+                    }
                 )
+
+                // Handle back press
+                BackHandler {
+                    navController.popBackStack()
+                }
             }
 
-            is Screen.AskQuestion -> {
+            composable(
+                route = Routes.ASK_QUESTION,
+                enterTransition = {
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Left,
+                        animationSpec = tween(ANIMATION_DURATION)
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(ANIMATION_DURATION)
+                    )
+                }
+            ) {
                 AskQuestionScreen(
                     onBackClick = {
                         authViewModel.clearMessages()
-                        currentScreen = Screen.Home
-                    },
-                    modifier = Modifier.padding(innerPadding)
+                        navController.popBackStack()
+                    }
                 )
+
+                // Handle back press
+                BackHandler {
+                    navController.popBackStack()
+                }
             }
         }
     }

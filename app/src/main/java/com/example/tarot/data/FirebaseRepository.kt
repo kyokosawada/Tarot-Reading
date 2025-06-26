@@ -26,7 +26,7 @@ class FirebaseRepository {
                 "id" to user.id,
                 "name" to user.name,
                 "email" to user.email,
-                "photoUrl" to user.photoUrl,
+                "username" to user.username,
                 "birthMonth" to user.birthMonth,
                 "birthYear" to user.birthYear,
                 "isProfileComplete" to user.isProfileComplete,
@@ -50,7 +50,7 @@ class FirebaseRepository {
                     id = userData?.get("id") as? String ?: userId,
                     name = userData?.get("name") as? String ?: "",
                     email = userData?.get("email") as? String ?: "",
-                    photoUrl = userData?.get("photoUrl") as? String,
+                    username = userData?.get("username") as? String,
                     birthMonth = (userData?.get("birthMonth") as? Long)?.toInt(),
                     birthYear = (userData?.get("birthYear") as? Long)?.toInt(),
                     isProfileComplete = userData?.get("isProfileComplete") as? Boolean ?: false
