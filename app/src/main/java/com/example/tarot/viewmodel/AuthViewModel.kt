@@ -7,6 +7,7 @@ import androidx.credentials.exceptions.GetCredentialException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tarot.data.DummyAuthRepository
+import com.example.tarot.data.FirebaseRepository
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
@@ -23,14 +24,18 @@ data class AuthUiState(
     val errorMessage: String? = null,
     val user: User? = null,
     val signupSuccess: Boolean = false,
-    val successMessage: String? = null
+    val successMessage: String? = null,
+    val needsProfileCompletion: Boolean = false
 )
 
 data class User(
     val id: String,
     val name: String,
     val email: String,
-    val photoUrl: String? = null
+    val photoUrl: String? = null,
+    val birthMonth: Int? = null,  // 1-12 for January-December
+    val birthYear: Int? = null,
+    val isProfileComplete: Boolean = false
 )
 
 class AuthViewModel : ViewModel() {
@@ -40,12 +45,81 @@ class AuthViewModel : ViewModel() {
     // Firebase Auth instance
     private val firebaseAuth = FirebaseAuth.getInstance()
 
+    // Firebase repository for Firestore operations
+    private val firebaseRepository = FirebaseRepository()
+
     // Dummy data repository for testing
     private val authRepository = DummyAuthRepository()
 
     // Web client ID from Firebase Console
     private val webClientId =
         "972003711031-4o27g7sjiet4kqq1l12j15ig0ji36ik3.apps.googleusercontent.com"
+
+    fun completeProfile(birthMonth: Int, birthYear: Int) {
+        viewModelScope.launch {
+            try {
+                _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+
+                val currentUser = _uiState.value.user
+                if (currentUser != null) {
+                    // Validate birth date
+                    if (birthMonth < 1 || birthMonth > 12) {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            errorMessage = "Please select a valid birth month"
+                        )
+                        return@launch
+                    }
+
+                    val currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)
+                    if (birthYear < 1900 || birthYear > currentYear) {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            errorMessage = "Please enter a valid birth year"
+                        )
+                        return@launch
+                    }
+
+                    // Update user with birth date information
+                    val updatedUser = currentUser.copy(
+                        birthMonth = birthMonth,
+                        birthYear = birthYear,
+                        isProfileComplete = true
+                    )
+
+                    // Save to Firestore database
+                    val result = firebaseRepository.saveUserProfile(updatedUser)
+                    result.fold(
+                        onSuccess = {
+                            _uiState.value = _uiState.value.copy(
+                                isLoading = false,
+                                user = updatedUser,
+                                needsProfileCompletion = false,
+                                successMessage = "Profile completed successfully!"
+                            )
+                        },
+                        onFailure = { error ->
+                            _uiState.value = _uiState.value.copy(
+                                isLoading = false,
+                                errorMessage = "Failed to save profile: ${error.message}"
+                            )
+                        }
+                    )
+                } else {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        errorMessage = "User not found. Please log in again."
+                    )
+                }
+
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    errorMessage = "Failed to complete profile: ${e.message}"
+                )
+            }
+        }
+    }
 
     init {
         // Check if user is already logged in
@@ -55,15 +129,47 @@ class AuthViewModel : ViewModel() {
     private fun checkCurrentUser() {
         val currentUser = firebaseAuth.currentUser
         if (currentUser != null) {
-            _uiState.value = _uiState.value.copy(
-                isLoggedIn = true,
-                user = User(
-                    id = currentUser.uid,
-                    name = currentUser.displayName ?: "",
-                    email = currentUser.email ?: "",
-                    photoUrl = currentUser.photoUrl?.toString()
+            // Load user profile from Firestore
+            viewModelScope.launch {
+                val profileResult = firebaseRepository.getUserProfile(currentUser.uid)
+                profileResult.fold(
+                    onSuccess = { firestoreUser ->
+                        val user = firestoreUser ?: User(
+                            id = currentUser.uid,
+                            name = currentUser.displayName ?: "",
+                            email = currentUser.email ?: "",
+                            photoUrl = currentUser.photoUrl?.toString(),
+                            birthMonth = null,
+                            birthYear = null,
+                            isProfileComplete = false
+                        )
+
+                        _uiState.value = _uiState.value.copy(
+                            isLoggedIn = true,
+                            user = user,
+                            needsProfileCompletion = !user.isProfileComplete
+                        )
+                    },
+                    onFailure = {
+                        // Fallback to Firebase Auth data if Firestore fails
+                        val user = User(
+                            id = currentUser.uid,
+                            name = currentUser.displayName ?: "",
+                            email = currentUser.email ?: "",
+                            photoUrl = currentUser.photoUrl?.toString(),
+                            birthMonth = null,
+                            birthYear = null,
+                            isProfileComplete = false
+                        )
+
+                        _uiState.value = _uiState.value.copy(
+                            isLoggedIn = true,
+                            user = user,
+                            needsProfileCompletion = true
+                        )
+                    }
                 )
-            )
+            }
         }
     }
 
@@ -98,16 +204,22 @@ class AuthViewModel : ViewModel() {
 
                 val firebaseUser = authResult.user
                 if (firebaseUser != null) {
+                    val user = User(
+                        id = firebaseUser.uid,
+                        name = firebaseUser.displayName ?: "",
+                        email = firebaseUser.email ?: "",
+                        photoUrl = firebaseUser.photoUrl?.toString(),
+                        birthMonth = null, // Will be set during profile completion
+                        birthYear = null,
+                        isProfileComplete = false // New Google users need to complete profile
+                    )
+
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         isLoggedIn = true,
-                        user = User(
-                            id = firebaseUser.uid,
-                            name = firebaseUser.displayName ?: "",
-                            email = firebaseUser.email ?: "",
-                            photoUrl = firebaseUser.photoUrl?.toString()
-                        ),
-                        errorMessage = null
+                        user = user,
+                        errorMessage = null,
+                        needsProfileCompletion = !user.isProfileComplete
                     )
                 } else {
                     _uiState.value = _uiState.value.copy(
@@ -157,16 +269,48 @@ class AuthViewModel : ViewModel() {
                 val firebaseUser = authResult.user
 
                 if (firebaseUser != null) {
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        isLoggedIn = true,
-                        user = User(
-                            id = firebaseUser.uid,
-                            name = firebaseUser.displayName ?: "",
-                            email = firebaseUser.email ?: "",
-                            photoUrl = firebaseUser.photoUrl?.toString()
-                        ),
-                        errorMessage = null
+                    // Load user profile from Firestore
+                    val profileResult = firebaseRepository.getUserProfile(firebaseUser.uid)
+                    profileResult.fold(
+                        onSuccess = { firestoreUser ->
+                            val user = firestoreUser ?: User(
+                                id = firebaseUser.uid,
+                                name = firebaseUser.displayName ?: "",
+                                email = firebaseUser.email ?: "",
+                                photoUrl = firebaseUser.photoUrl?.toString(),
+                                birthMonth = null,
+                                birthYear = null,
+                                isProfileComplete = false
+                            )
+
+                            _uiState.value = _uiState.value.copy(
+                                isLoading = false,
+                                isLoggedIn = true,
+                                user = user,
+                                needsProfileCompletion = !user.isProfileComplete,
+                                errorMessage = null
+                            )
+                        },
+                        onFailure = {
+                            // Fallback to Firebase Auth data if Firestore fails
+                            val user = User(
+                                id = firebaseUser.uid,
+                                name = firebaseUser.displayName ?: "",
+                                email = firebaseUser.email ?: "",
+                                photoUrl = firebaseUser.photoUrl?.toString(),
+                                birthMonth = null,
+                                birthYear = null,
+                                isProfileComplete = false
+                            )
+
+                            _uiState.value = _uiState.value.copy(
+                                isLoading = false,
+                                isLoggedIn = true,
+                                user = user,
+                                needsProfileCompletion = true,
+                                errorMessage = null
+                            )
+                        }
                     )
                 } else {
                     _uiState.value = _uiState.value.copy(
@@ -184,7 +328,13 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    fun signUp(name: String, email: String, password: String) {
+    fun signUp(
+        name: String,
+        email: String,
+        password: String,
+        birthMonth: Int? = null,
+        birthYear: Int? = null
+    ) {
         viewModelScope.launch {
             try {
                 _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
@@ -226,6 +376,8 @@ class AuthViewModel : ViewModel() {
                     }
                     firebaseUser.updateProfile(profileUpdates).await()
 
+                    val isProfileComplete = birthMonth != null && birthYear != null
+
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         signupSuccess = true,
@@ -234,7 +386,10 @@ class AuthViewModel : ViewModel() {
                             id = firebaseUser.uid,
                             name = name,
                             email = firebaseUser.email ?: "",
-                            photoUrl = firebaseUser.photoUrl?.toString()
+                            photoUrl = firebaseUser.photoUrl?.toString(),
+                            birthMonth = birthMonth,
+                            birthYear = birthYear,
+                            isProfileComplete = isProfileComplete
                         ),
                         errorMessage = null
                     )

@@ -25,7 +25,10 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -64,7 +67,7 @@ import com.example.tarot.ui.theme.TextSecondary
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(
-    onSignUpClick: (String, String, String) -> Unit = { _, _, _ -> },
+    onSignUpClick: (String, String, String, Int?, Int?) -> Unit = { _, _, _, _, _ -> },
     onSignInClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -72,6 +75,9 @@ fun SignUpScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
+    var selectedMonth by remember { mutableStateOf("") }
+    var selectedYear by remember { mutableStateOf("") }
+    var monthExpanded by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
     var acceptTerms by remember { mutableStateOf(false) }
@@ -81,6 +87,12 @@ fun SignUpScreen(
     var isPasswordError by remember { mutableStateOf(false) }
     var isConfirmPasswordError by remember { mutableStateOf(false) }
     var passwordMismatch by remember { mutableStateOf(false) }
+
+    val months = listOf(
+        "January" to 1, "February" to 2, "March" to 3, "April" to 4,
+        "May" to 5, "June" to 6, "July" to 7, "August" to 8,
+        "September" to 9, "October" to 10, "November" to 11, "December" to 12
+    )
 
     Box(
         modifier = modifier
@@ -306,6 +318,72 @@ fun SignUpScreen(
                 .padding(bottom = 16.dp)
         )
 
+        // Birth Date Selection
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            // Month Dropdown
+            ExposedDropdownMenuBox(
+                expanded = monthExpanded,
+                onExpandedChange = { monthExpanded = !monthExpanded }
+            ) {
+                OutlinedTextField(
+                    value = selectedMonth,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Birth Month", color = TextSecondary) },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = monthExpanded)
+                    },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MysticGold,
+                        unfocusedBorderColor = MysticSilver,
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary
+                    ),
+                    modifier = Modifier
+                        .menuAnchor()
+                        .width(180.dp)
+                )
+                ExposedDropdownMenu(
+                    expanded = monthExpanded,
+                    onDismissRequest = { monthExpanded = false }
+                ) {
+                    months.forEach { (month, _) ->
+                        DropdownMenuItem(
+                            text = { Text(month) },
+                            onClick = {
+                                selectedMonth = month
+                                monthExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            // Year Input
+            OutlinedTextField(
+                value = selectedYear,
+                onValueChange = { selectedYear = it },
+                label = { Text("Birth Year", color = TextSecondary) },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Done
+                ),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MysticGold,
+                    unfocusedBorderColor = MysticSilver,
+                    focusedTextColor = TextPrimary,
+                    unfocusedTextColor = TextPrimary,
+                    cursorColor = MysticGold
+                ),
+                modifier = Modifier.width(120.dp)
+            )
+        }
+
         // Terms and Conditions
         Row(
             modifier = Modifier
@@ -358,7 +436,9 @@ fun SignUpScreen(
                 }
                 
                 if (isValid) {
-                    onSignUpClick(fullName, email, password)
+                    val month = months.find { it.first == selectedMonth }?.second
+                    val year = selectedYear.toIntOrNull()
+                    onSignUpClick(fullName, email, password, month, year)
                 }
             },
             enabled = acceptTerms,

@@ -2,9 +2,12 @@ package com.example.tarot.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.tarot.data.FirebaseRepository
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 data class HomeUiState(
@@ -51,8 +54,20 @@ class HomeViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
+    private val firebaseRepository = FirebaseRepository()
+    private val auth = FirebaseAuth.getInstance()
+
     init {
         loadHomeData()
+        observeReadings()
+    }
+
+    private fun observeReadings() {
+        viewModelScope.launch {
+            firebaseRepository.getUserReadings().collectLatest { readings ->
+                _uiState.value = _uiState.value.copy(recentReadings = readings)
+            }
+        }
     }
 
     private fun loadHomeData() {
@@ -63,13 +78,11 @@ class HomeViewModel : ViewModel() {
                 // Simulate API call
 
                 val dailyInsight = generateDailyInsight()
-                val recentReadings = generateRecentReadings()
-                val userStats = generateUserStats()
+                val userStats = loadUserStats()
 
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     dailyInsight = dailyInsight,
-                    recentReadings = recentReadings,
                     userStats = userStats,
                     errorMessage = null
                 )
@@ -88,20 +101,35 @@ class HomeViewModel : ViewModel() {
             try {
                 _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
 
-                // Simulate new reading
-
                 val newReading = generateReading(readingType)
-                val updatedReadings = listOf(newReading) + _uiState.value.recentReadings.take(4)
-                val updatedStats = _uiState.value.userStats.copy(
-                    totalReadings = _uiState.value.userStats.totalReadings + 1,
-                    experiencePoints = _uiState.value.userStats.experiencePoints + 10
-                )
 
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    recentReadings = updatedReadings,
-                    userStats = updatedStats,
-                    errorMessage = null
+                // Save reading to Firestore
+                val saveResult = firebaseRepository.saveTarotReading(newReading)
+                saveResult.fold(
+                    onSuccess = {
+                        // Update stats
+                        val updatedStats = _uiState.value.userStats.copy(
+                            totalReadings = _uiState.value.userStats.totalReadings + 1,
+                            experiencePoints = _uiState.value.userStats.experiencePoints + 10
+                        )
+
+                        // Save updated stats
+                        auth.currentUser?.uid?.let { userId ->
+                            firebaseRepository.saveUserStats(userId, updatedStats)
+                        }
+
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            userStats = updatedStats,
+                            errorMessage = null
+                        )
+                    },
+                    onFailure = { error ->
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            errorMessage = "Failed to save reading: ${error.message}"
+                        )
+                    }
                 )
 
             } catch (e: Exception) {
@@ -175,6 +203,15 @@ class HomeViewModel : ViewModel() {
                 interpretation = "Balance is key in all areas of your life. Take time for self-care."
             )
         )
+    }
+
+    private suspend fun loadUserStats(): UserStats {
+        val userId = auth.currentUser?.uid
+        return if (userId != null) {
+            firebaseRepository.getUserStats(userId).getOrNull() ?: generateUserStats()
+        } else {
+            generateUserStats()
+        }
     }
 
     private fun generateUserStats(): UserStats {

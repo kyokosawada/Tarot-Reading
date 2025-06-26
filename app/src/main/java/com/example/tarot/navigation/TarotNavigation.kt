@@ -13,6 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.example.tarot.ui.screens.auth.ForgotPasswordScreen
 import com.example.tarot.ui.screens.auth.LoginScreen
+import com.example.tarot.ui.screens.auth.ProfileCompletionScreen
 import com.example.tarot.ui.screens.auth.SignUpScreen
 import com.example.tarot.ui.screens.home.HomeScreen
 import com.example.tarot.ui.screens.home.ProfileScreen
@@ -24,6 +25,7 @@ sealed class Screen {
     object Login : Screen()
     object SignUp : Screen()
     object ForgotPassword : Screen()
+    object ProfileCompletion : Screen()
     object Home : Screen()
     object Profile : Screen()
     object DailyReading : Screen()
@@ -41,6 +43,16 @@ fun TarotNavigation(
 
     // Handle login success - navigate to home
     if (authUiState.isLoggedIn && currentScreen == Screen.Login) {
+        // Check if profile completion is needed (for Google sign-in users)
+        currentScreen = if (authUiState.needsProfileCompletion) {
+            Screen.ProfileCompletion
+        } else {
+            Screen.Home
+        }
+    }
+
+    // Handle profile completion success - navigate to home
+    if (authUiState.isLoggedIn && !authUiState.needsProfileCompletion && currentScreen == Screen.ProfileCompletion) {
         currentScreen = Screen.Home
     }
 
@@ -53,7 +65,8 @@ fun TarotNavigation(
     if (!authUiState.isLoggedIn && currentScreen !in listOf(
             Screen.Login,
             Screen.SignUp,
-            Screen.ForgotPassword
+            Screen.ForgotPassword,
+            Screen.ProfileCompletion
         )
     ) {
         currentScreen = Screen.Login
@@ -64,6 +77,12 @@ fun TarotNavigation(
         Screen.SignUp, Screen.ForgotPassword -> {
             BackHandler {
                 currentScreen = Screen.Login
+            }
+        }
+        Screen.ProfileCompletion -> {
+            BackHandler {
+                // Don't allow back navigation from profile completion
+                // User must complete profile to continue
             }
         }
         Screen.Profile, Screen.DailyReading, Screen.AskQuestion -> {
@@ -112,8 +131,8 @@ fun TarotNavigation(
 
             is Screen.SignUp -> {
                 SignUpScreen(
-                    onSignUpClick = { name, email, password ->
-                        authViewModel.signUp(name, email, password)
+                    onSignUpClick = { name, email, password, month, year ->
+                        authViewModel.signUp(name, email, password, month, year)
                     },
                     onSignInClick = {
                         authViewModel.clearMessages()
@@ -138,6 +157,16 @@ fun TarotNavigation(
                         authViewModel.clearMessages()
                         currentScreen = Screen.Login
                     },
+                    modifier = Modifier.padding(innerPadding)
+                )
+            }
+
+            is Screen.ProfileCompletion -> {
+                ProfileCompletionScreen(
+                    onCompleteProfile = { month, year ->
+                        authViewModel.completeProfile(month, year)
+                    },
+                    authUiState = authUiState,
                     modifier = Modifier.padding(innerPadding)
                 )
             }
