@@ -53,7 +53,8 @@ class FirebaseRepository {
                     username = userData?.get("username") as? String,
                     birthMonth = (userData?.get("birthMonth") as? Long)?.toInt(),
                     birthYear = (userData?.get("birthYear") as? Long)?.toInt(),
-                    isProfileComplete = userData?.get("isProfileComplete") as? Boolean ?: false
+                    isProfileComplete = userData?.get("isProfileComplete") as? Boolean ?: false,
+                    createdAt = userData?.get("createdAt") as? Long
                 )
                 Result.success(user)
             } else {

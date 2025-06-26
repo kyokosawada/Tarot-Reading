@@ -1,42 +1,72 @@
 package com.example.tarot.ui.screens.home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.tarot.R
 import com.example.tarot.ui.theme.TarotTheme
+import com.example.tarot.viewmodel.AuthViewModel
+import com.example.tarot.viewmodel.User
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
+    authViewModel: AuthViewModel,
     onBackClick: () -> Unit = {},
     onEditProfileClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val authUiState by authViewModel.uiState.collectAsState()
+    val user = authUiState.user
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -60,27 +90,39 @@ fun ProfileScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            item {
-                ProfileHeader()
+        if (user != null) {
+            LazyColumn(
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item {
+                    ProfileHeader(user = user)
+                }
+
+                item {
+                    StatsSection()
+                }
+
+                item {
+                    PreferencesSection()
+                }
+
+                item {
+                    AccountSection(onLogoutClick = onLogoutClick)
+                }
             }
-            
-            item {
-                StatsSection()
-            }
-            
-            item {
-                PreferencesSection()
-            }
-            
-            item {
-                AccountSection(onLogoutClick = onLogoutClick)
+        } else {
+            // Loading or error state
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
         }
     }
@@ -88,6 +130,7 @@ fun ProfileScreen(
 
 @Composable
 fun ProfileHeader(
+    user: User,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -102,7 +145,7 @@ fun ProfileHeader(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Profile Avatar
+            // Profile Avatar using the added avatar.png
             Box(
                 modifier = Modifier
                     .size(100.dp)
@@ -110,38 +153,53 @@ fun ProfileHeader(
                     .background(
                         brush = Brush.radialGradient(
                             colors = listOf(
-                                MaterialTheme.colorScheme.primary,
-                                MaterialTheme.colorScheme.secondary
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
                             )
                         )
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "🧙‍♀️",
-                    fontSize = 48.sp
+                Image(
+                    painter = painterResource(id = R.drawable.avatar),
+                    contentDescription = "Profile Avatar",
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
                 )
             }
             
             Spacer(modifier = Modifier.height(16.dp))
-            
+
+            // Display name - prefer username over name if available
             Text(
-                text = "Mystic Reader",
+                text = user.username?.takeIf { it.isNotBlank() }
+                    ?: user.name.takeIf { it.isNotBlank() } ?: "Mystic Reader",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
-            
+
+            // Display email
             Text(
-                text = "mysticeader@example.com",
+                text = user.email,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
             )
             
             Spacer(modifier = Modifier.height(8.dp))
-            
+
+            // Display join date if available
+            val joinDate = user.createdAt?.let { timestamp ->
+                val date = java.util.Date(timestamp)
+                val formatter =
+                    java.text.SimpleDateFormat("MMMM yyyy", java.util.Locale.getDefault())
+                "Joined ${formatter.format(date)}"
+            } ?: "Mystic Reader Member"
+
             Text(
-                text = "Member since January 2024",
+                text = joinDate,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f)
             )
@@ -367,7 +425,18 @@ fun PreferenceItem(
 @Composable
 fun ProfileScreenPreview() {
     TarotTheme {
-        ProfileScreen()
+        // Mock user data for preview
+        val mockUser = User(
+            id = "preview_id",
+            name = "Mystic Reader",
+            email = "mystic@example.com",
+            username = "mystic_seeker",
+            birthMonth = 3,
+            birthYear = 1995,
+            isProfileComplete = true,
+            createdAt = System.currentTimeMillis() - (30L * 24 * 60 * 60 * 1000) // 30 days ago
+        )
+        ProfileHeader(user = mockUser)
     }
 }
 
@@ -375,7 +444,18 @@ fun ProfileScreenPreview() {
 @Composable
 fun ProfileScreenDarkPreview() {
     TarotTheme(darkTheme = true) {
-        ProfileScreen()
+        // Mock user data for preview
+        val mockUser = User(
+            id = "preview_id",
+            name = "Mystic Reader",
+            email = "mystic@example.com",
+            username = "mystic_seeker",
+            birthMonth = 10,
+            birthYear = 1990,
+            isProfileComplete = true,
+            createdAt = System.currentTimeMillis() - (90L * 24 * 60 * 60 * 1000) // 90 days ago
+        )
+        ProfileHeader(user = mockUser)
     }
 }
 
@@ -383,7 +463,18 @@ fun ProfileScreenDarkPreview() {
 @Composable
 fun ProfileHeaderPreview() {
     TarotTheme {
-        ProfileHeader()
+        // Mock user data for preview
+        val mockUser = User(
+            id = "preview_id",
+            name = "Luna Starlight",
+            email = "luna.starlight@example.com",
+            username = "luna_mystic",
+            birthMonth = 7,
+            birthYear = 1992,
+            isProfileComplete = true,
+            createdAt = 1640995200000L // January 1, 2022
+        )
+        ProfileHeader(user = mockUser)
     }
 }
 

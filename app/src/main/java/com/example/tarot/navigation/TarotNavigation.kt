@@ -290,6 +290,7 @@ fun TarotNavigation(
                 }
             ) {
                 ProfileScreen(
+                    authViewModel = authViewModel,
                     onBackClick = {
                         authViewModel.clearMessages()
                         navController.popBackStack()

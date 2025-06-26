@@ -35,7 +35,8 @@ data class User(
     val username: String? = null,  // Preferred username for the app
     val birthMonth: Int? = null,  // 1-12 for January-December
     val birthYear: Int? = null,
-    val isProfileComplete: Boolean = false
+    val isProfileComplete: Boolean = false,
+    val createdAt: Long? = null  // Timestamp when user joined
 )
 
 class AuthViewModel : ViewModel() {
@@ -176,7 +177,8 @@ class AuthViewModel : ViewModel() {
                             username = null,
                             birthMonth = null,
                             birthYear = null,
-                            isProfileComplete = false
+                            isProfileComplete = false,
+                            createdAt = System.currentTimeMillis()
                         )
 
                         _uiState.value = _uiState.value.copy(
@@ -250,7 +252,8 @@ class AuthViewModel : ViewModel() {
                                 username = null, // Will be set during profile completion
                                 birthMonth = null, // Will be set during profile completion
                                 birthYear = null,
-                                isProfileComplete = false // New Google users need to complete profile
+                                isProfileComplete = false, // New Google users need to complete profile
+                                createdAt = System.currentTimeMillis()
                             )
 
                             _uiState.value = _uiState.value.copy(
@@ -270,7 +273,8 @@ class AuthViewModel : ViewModel() {
                                 username = null,
                                 birthMonth = null,
                                 birthYear = null,
-                                isProfileComplete = false
+                                isProfileComplete = false,
+                                createdAt = System.currentTimeMillis()
                             )
 
                             _uiState.value = _uiState.value.copy(
@@ -341,7 +345,8 @@ class AuthViewModel : ViewModel() {
                                 username = null,
                                 birthMonth = null,
                                 birthYear = null,
-                                isProfileComplete = false
+                                isProfileComplete = false,
+                                createdAt = System.currentTimeMillis()
                             )
 
                             _uiState.value = _uiState.value.copy(
@@ -361,7 +366,8 @@ class AuthViewModel : ViewModel() {
                                 username = null,
                                 birthMonth = null,
                                 birthYear = null,
-                                isProfileComplete = false
+                                isProfileComplete = false,
+                                createdAt = System.currentTimeMillis()
                             )
 
                             _uiState.value = _uiState.value.copy(
@@ -450,7 +456,8 @@ class AuthViewModel : ViewModel() {
                             username = null,
                             birthMonth = birthMonth,
                             birthYear = birthYear,
-                            isProfileComplete = isProfileComplete
+                            isProfileComplete = isProfileComplete,
+                            createdAt = System.currentTimeMillis()
                         ),
                         errorMessage = null
                     )
