@@ -1,7 +1,7 @@
 package com.example.tarot.ui.screens.home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,17 +35,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tarot.ui.components.MysticaLogoCompact
-import com.example.tarot.ui.theme.CardBack
-import com.example.tarot.ui.theme.CardBorder
-import com.example.tarot.ui.theme.CardGlow
 import com.example.tarot.ui.theme.MysticCosmic
 import com.example.tarot.ui.theme.MysticDarkBlue
 import com.example.tarot.ui.theme.MysticGold
@@ -59,6 +57,7 @@ import com.example.tarot.ui.theme.TarotTheme
 import com.example.tarot.ui.theme.TextAccent
 import com.example.tarot.ui.theme.TextPrimary
 import com.example.tarot.ui.theme.TextSecondary
+import com.example.tarot.util.ImageResourceMapper
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -185,39 +184,14 @@ fun MysticTarotCard() {
     Box(
         modifier = Modifier
             .size(width = 200.dp, height = 320.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        CardBack,
-                        MysticNavy
-                    )
-                )
-            )
-            .border(
-                width = 2.dp,
-                color = CardBorder,
-                shape = RoundedCornerShape(16.dp)
-            ),
+            .clip(RoundedCornerShape(16.dp)),
         contentAlignment = Alignment.Center
     ) {
-        // Card glow effect
-        Box(
-            modifier = Modifier
-                .size(width = 180.dp, height = 300.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(CardGlow)
-        )
-        
-        // Diamond symbol in center
-        Box(
-            modifier = Modifier
-                .size(12.dp)
-                .background(
-                    color = MysticGold,
-                    shape = RoundedCornerShape(2.dp)
-                )
-                .rotate(45f)
+        Image(
+            painter = painterResource(ImageResourceMapper.getCardBackResource()),
+            contentDescription = "Tarot Card Back",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
         )
     }
 }

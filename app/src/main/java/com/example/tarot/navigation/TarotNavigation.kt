@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.tarot.ui.screens.SplashScreen
 import com.example.tarot.ui.screens.auth.ForgotPasswordScreen
 import com.example.tarot.ui.screens.auth.LoginScreen
 import com.example.tarot.ui.screens.auth.ProfileCompletionScreen
@@ -29,6 +30,7 @@ import com.example.tarot.viewmodel.AuthViewModel
 
 // Navigation routes
 object Routes {
+    const val SPLASH = "splash"
     const val LOGIN = "login"
     const val SIGN_UP = "signup"
     const val FORGOT_PASSWORD = "forgot_password"
@@ -51,36 +53,42 @@ fun TarotNavigation(
     val navController = rememberNavController()
     val context = LocalContext.current
 
-    // Handle authentication state changes
+    // Handle authentication state changes after initialization
     LaunchedEffect(
+        authUiState.isInitializing,
         authUiState.isLoggedIn,
         authUiState.needsProfileCompletion,
         authUiState.signupSuccess
     ) {
-        when {
-            authUiState.signupSuccess -> {
-                navController.navigate(Routes.LOGIN) {
-                    popUpTo(Routes.SIGN_UP) { inclusive = true }
-                }
-            }
-            authUiState.isLoggedIn && authUiState.needsProfileCompletion -> {
-                navController.navigate(Routes.PROFILE_COMPLETION) {
-                    popUpTo(Routes.LOGIN) { inclusive = true }
-                }
-            }
-            authUiState.isLoggedIn && !authUiState.needsProfileCompletion -> {
-                val currentRoute = navController.currentBackStackEntry?.destination?.route
-                if (currentRoute == Routes.LOGIN || currentRoute == Routes.PROFILE_COMPLETION) {
-                    navController.navigate(Routes.HOME) {
-                        popUpTo(0) { inclusive = true } // Clear entire back stack
+        // Wait for initialization to complete
+        if (!authUiState.isInitializing) {
+            when {
+                authUiState.signupSuccess -> {
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(Routes.SIGN_UP) { inclusive = true }
                     }
                 }
-            }
-            !authUiState.isLoggedIn -> {
-                val currentRoute = navController.currentBackStackEntry?.destination?.route
-                if (currentRoute !in listOf(Routes.LOGIN, Routes.SIGN_UP, Routes.FORGOT_PASSWORD)) {
-                    navController.navigate(Routes.LOGIN) {
-                        popUpTo(0) { inclusive = true }
+                authUiState.isLoggedIn && authUiState.needsProfileCompletion -> {
+                    navController.navigate(Routes.PROFILE_COMPLETION) {
+                        popUpTo(Routes.SPLASH) { inclusive = true }
+                    }
+                }
+                authUiState.isLoggedIn && !authUiState.needsProfileCompletion -> {
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.SPLASH) { inclusive = true }
+                    }
+                }
+                !authUiState.isLoggedIn -> {
+                    val currentRoute = navController.currentBackStackEntry?.destination?.route
+                    if (currentRoute !in listOf(
+                            Routes.LOGIN,
+                            Routes.SIGN_UP,
+                            Routes.FORGOT_PASSWORD
+                        )
+                    ) {
+                        navController.navigate(Routes.LOGIN) {
+                            popUpTo(Routes.SPLASH) { inclusive = true }
+                        }
                     }
                 }
             }
@@ -92,9 +100,18 @@ fun TarotNavigation(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Routes.LOGIN,
+            startDestination = Routes.SPLASH,
             modifier = Modifier.padding(innerPadding)
         ) {
+            // Splash screen
+            composable(
+                route = Routes.SPLASH,
+                enterTransition = { fadeIn(animationSpec = tween(FADE_DURATION)) },
+                exitTransition = { fadeOut(animationSpec = tween(FADE_DURATION)) }
+            ) {
+                SplashScreen()
+            }
+
             // Auth screens with horizontal slide animations
             composable(
                 route = Routes.LOGIN,

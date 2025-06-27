@@ -6,20 +6,23 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
+import com.example.tarot.data.dao.DailyReadingDao
 import com.example.tarot.data.dao.TarotCardDao
 import com.example.tarot.data.model.CardType
+import com.example.tarot.data.model.DailyReading
 import com.example.tarot.data.model.Suit
 import com.example.tarot.data.model.TarotCard
 
 @Database(
-    entities = [TarotCard::class],
-    version = 2,
+    entities = [TarotCard::class, DailyReading::class],
+    version = 3,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
 abstract class TarotDatabase : RoomDatabase() {
 
     abstract fun tarotCardDao(): TarotCardDao
+    abstract fun dailyReadingDao(): DailyReadingDao
 
     companion object {
         @Volatile

@@ -4,6 +4,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,8 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -49,8 +48,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.tarot.data.model.TarotCard
 import com.example.tarot.ui.components.MysticCardBack
 import com.example.tarot.ui.components.MysticCardFront
-import com.example.tarot.ui.theme.BackgroundEnd
-import com.example.tarot.ui.theme.BackgroundStart
 import com.example.tarot.ui.theme.MysticDarkBlue
 import com.example.tarot.ui.theme.MysticGold
 import com.example.tarot.ui.theme.MysticNavy
@@ -120,8 +117,9 @@ fun DailyReadingScreen(
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            BackgroundStart,
-                            BackgroundEnd
+                            MysticDarkBlue,
+                            androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.9f),
+                            MysticDarkBlue
                         )
                     )
                 )
@@ -134,7 +132,7 @@ fun DailyReadingScreen(
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 // Daily Reading Title
                 Text(
@@ -143,7 +141,7 @@ fun DailyReadingScreen(
                     fontWeight = FontWeight.Bold,
                     color = TextAccent,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    modifier = Modifier.padding(bottom = 4.dp)
                 )
 
                 // Date
@@ -152,69 +150,46 @@ fun DailyReadingScreen(
                     fontSize = 14.sp,
                     color = TextSecondary,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(bottom = 8.dp)
                 )
 
                 // Instruction text
-                when {
-                    uiState.dailyCard == null && !uiState.hasDrawnToday -> {
-                        Text(
-                            text = "Draw your card for today's guidance",
-                            fontSize = 16.sp,
-                            color = TextSecondary,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(bottom = 32.dp)
-                        )
-                    }
-
-                    uiState.dailyCard != null && !uiState.isCardRevealed -> {
-                        Text(
-                            text = "Tap the card to reveal your message",
-                            fontSize = 16.sp,
-                            color = TextSecondary,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(bottom = 32.dp)
-                        )
-                    }
-
-                    else -> {
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
+                if (uiState.dailyCard != null && !uiState.isCardRevealed) {
+                    Text(
+                        text = "Tap to reveal your daily guidance",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = TextAccent,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                } else if (uiState.isCardRevealed) {
+                    Text(
+                        text = "Your guidance for today",
+                        fontSize = 16.sp,
+                        color = TextSecondary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
                 }
 
-                // Loading indicator
+                // Loading indicator or card display
                 if (uiState.isLoading) {
                     CircularProgressIndicator(
                         color = MysticGold,
                         modifier = Modifier.padding(32.dp)
                     )
-                }
-
-                // Draw card button or card display
-                if (uiState.dailyCard == null && !uiState.isLoading) {
-                    Button(
-                        onClick = { viewModel.drawDailyCard() },
-                        modifier = Modifier
-                            .fillMaxWidth(0.7f)
-                            .height(56.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MysticGold,
-                            contentColor = MysticDarkBlue
-                        ),
-                        shape = RoundedCornerShape(28.dp)
-                    ) {
-                        Text(
-                            text = "Draw Your Daily Card",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
                 } else if (uiState.dailyCard != null) {
-                    // Tarot Card
+                    // Tarot Card - always show when card is available
+                    val interactionSource = remember { MutableInteractionSource() }
+
                     Box(
                         modifier = Modifier
                             .size(width = 220.dp, height = 350.dp)
-                            .clickable {
+                            .clickable(
+                                interactionSource = interactionSource,
+                                indication = null
+                            ) {
                                 if (!uiState.isCardRevealed) {
                                     viewModel.revealCard()
                                 }
@@ -237,7 +212,7 @@ fun DailyReadingScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(48.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 // Card Interpretation
                 if (uiState.isCardRevealed && uiState.dailyCard != null) {
@@ -249,7 +224,7 @@ fun DailyReadingScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }

@@ -5,6 +5,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.tarot.data.FirebaseRepository
+import com.example.tarot.data.dao.DailyReadingDao
 import com.example.tarot.data.dao.TarotCardDao
 import com.example.tarot.data.database.TarotDatabase
 import com.example.tarot.data.repository.TarotRepository
@@ -33,6 +34,7 @@ object DatabaseModule {
                     // Database will be populated via repository when first accessed
                 }
             })
+            .fallbackToDestructiveMigration() // Handle version upgrade from 2 to 3
             .build()
     }
 
@@ -42,9 +44,17 @@ object DatabaseModule {
     }
 
     @Provides
+    fun provideDailyReadingDao(database: TarotDatabase): DailyReadingDao {
+        return database.dailyReadingDao()
+    }
+
+    @Provides
     @Singleton
-    fun provideTarotRepository(tarotCardDao: TarotCardDao): TarotRepository {
-        return TarotRepository(tarotCardDao)
+    fun provideTarotRepository(
+        tarotCardDao: TarotCardDao,
+        dailyReadingDao: DailyReadingDao
+    ): TarotRepository {
+        return TarotRepository(tarotCardDao, dailyReadingDao)
     }
 
     @Provides

@@ -21,6 +21,7 @@ import javax.inject.Inject
 
 data class AuthUiState(
     val isLoading: Boolean = false,
+    val isInitializing: Boolean = true, // New: Track initial auth check
     val isLoggedIn: Boolean = false,
     val errorMessage: String? = null,
     val user: User? = null,
@@ -157,54 +158,62 @@ class AuthViewModel @Inject constructor(
 
     init {
         // Check if user is already logged in
-        checkCurrentUser()
+        viewModelScope.launch {
+            checkCurrentUser()
+            _uiState.value = _uiState.value.copy(isInitializing = false)
+        }
     }
 
-    private fun checkCurrentUser() {
+    private suspend fun checkCurrentUser() {
         val currentUser = firebaseAuth.currentUser
         if (currentUser != null) {
             // Load user profile from Firestore
-            viewModelScope.launch {
-                val profileResult = firebaseRepository.getUserProfile(currentUser.uid)
-                profileResult.fold(
-                    onSuccess = { firestoreUser ->
-                        val user = firestoreUser ?: User(
-                            id = currentUser.uid,
-                            name = currentUser.displayName ?: "",
-                            email = currentUser.email ?: "",
-                            username = null,
-                            birthMonth = null,
-                            birthYear = null,
-                            isProfileComplete = false,
-                            createdAt = System.currentTimeMillis()
-                        )
+            val profileResult = firebaseRepository.getUserProfile(currentUser.uid)
+            profileResult.fold(
+                onSuccess = { firestoreUser ->
+                    val user = firestoreUser ?: User(
+                        id = currentUser.uid,
+                        name = currentUser.displayName ?: "",
+                        email = currentUser.email ?: "",
+                        username = null,
+                        birthMonth = null,
+                        birthYear = null,
+                        isProfileComplete = false,
+                        createdAt = System.currentTimeMillis()
+                    )
 
-                        _uiState.value = _uiState.value.copy(
-                            isLoggedIn = true,
-                            user = user,
-                            needsProfileCompletion = !user.isProfileComplete
-                        )
-                    },
-                    onFailure = {
-                        // Fallback to Firebase Auth data if Firestore fails
-                        val user = User(
-                            id = currentUser.uid,
-                            name = currentUser.displayName ?: "",
-                            email = currentUser.email ?: "",
-                            username = null,
-                            birthMonth = null,
-                            birthYear = null,
-                            isProfileComplete = false
-                        )
+                    _uiState.value = _uiState.value.copy(
+                        isLoggedIn = true,
+                        user = user,
+                        needsProfileCompletion = !user.isProfileComplete
+                    )
+                },
+                onFailure = {
+                    // Fallback to Firebase Auth data if Firestore fails
+                    val user = User(
+                        id = currentUser.uid,
+                        name = currentUser.displayName ?: "",
+                        email = currentUser.email ?: "",
+                        username = null,
+                        birthMonth = null,
+                        birthYear = null,
+                        isProfileComplete = false
+                    )
 
-                        _uiState.value = _uiState.value.copy(
-                            isLoggedIn = true,
-                            user = user,
-                            needsProfileCompletion = true
-                        )
-                    }
-                )
-            }
+                    _uiState.value = _uiState.value.copy(
+                        isLoggedIn = true,
+                        user = user,
+                        needsProfileCompletion = true
+                    )
+                }
+            )
+        } else {
+            // User is not logged in
+            _uiState.value = _uiState.value.copy(
+                isLoggedIn = false,
+                user = null,
+                needsProfileCompletion = false
+            )
         }
     }
 

@@ -2,6 +2,7 @@ package com.example.tarot.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.tarot.data.model.DailyReading
 import com.example.tarot.data.model.TarotCard
 import com.example.tarot.data.model.getUprightKeywordsList
 import com.example.tarot.data.repository.TarotRepository
@@ -18,6 +19,7 @@ import javax.inject.Inject
 data class DailyReadingUiState(
     val isLoading: Boolean = false,
     val dailyCard: TarotCard? = null,
+    val dailyReading: DailyReading? = null,
     val isCardRevealed: Boolean = false,
     val readingDate: String = "",
     val errorMessage: String? = null,
@@ -42,14 +44,23 @@ class DailyReadingViewModel @Inject constructor(
                 _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
 
                 val currentDate = getCurrentDate()
-                // For now, we'll generate a new card each time
-                // Later you can add logic to check if user already drew today
+                val existingReading = tarotRepository.getTodaysReading()
 
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    readingDate = currentDate,
-                    hasDrawnToday = false
-                )
+                if (existingReading != null) {
+                    // User already has a reading for today
+                    val card = tarotRepository.getCardById(existingReading.cardId)
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        dailyCard = card,
+                        dailyReading = existingReading,
+                        isCardRevealed = existingReading.isRevealed,
+                        readingDate = currentDate,
+                        hasDrawnToday = true
+                    )
+                } else {
+                    // No reading for today, draw a new card
+                    drawDailyCard()
+                }
 
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
@@ -60,24 +71,33 @@ class DailyReadingViewModel @Inject constructor(
         }
     }
 
-    fun drawDailyCard() {
+    private fun drawDailyCard() {
         viewModelScope.launch {
             try {
                 _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
 
-                println("DailyReadingViewModel: Starting to draw daily card")
+                println("DailyReadingViewModel: Drawing new daily card")
 
-                // Get random card from Room database
+                // Get random card from database
                 val randomCard = tarotRepository.getRandomCard()
 
-                println("DailyReadingViewModel: Successfully drew card: ${randomCard.name}")
+                // Save daily reading to database
+                val dailyReading = tarotRepository.saveDailyReading(randomCard)
+
+                println("DailyReadingViewModel: Successfully drew and saved card: ${randomCard.name}")
 
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     dailyCard = randomCard,
+                    dailyReading = dailyReading,
+                    isCardRevealed = false,
+                    readingDate = getCurrentDate(),
                     hasDrawnToday = true,
                     errorMessage = null
                 )
+
+                // Clean up old readings (keep last 30 days)
+                tarotRepository.cleanupOldReadings(30)
 
             } catch (e: Exception) {
                 println("DailyReadingViewModel: Error drawing card: ${e.message}")
@@ -91,11 +111,33 @@ class DailyReadingViewModel @Inject constructor(
     }
 
     fun revealCard() {
-        _uiState.value = _uiState.value.copy(isCardRevealed = true)
+        viewModelScope.launch {
+            try {
+                val currentReading = _uiState.value.dailyReading
+                if (currentReading != null && !currentReading.isRevealed) {
+                    // Update reading as revealed in database
+                    val updatedReading = currentReading.copy(isRevealed = true)
+                    tarotRepository.updateDailyReading(updatedReading)
+
+                    _uiState.value = _uiState.value.copy(
+                        isCardRevealed = true,
+                        dailyReading = updatedReading
+                    )
+                } else {
+                    // Fallback for local state update
+                    _uiState.value = _uiState.value.copy(isCardRevealed = true)
+                }
+            } catch (e: Exception) {
+                // If database update fails, still update UI
+                _uiState.value = _uiState.value.copy(isCardRevealed = true)
+                println("Failed to update reading reveal status: ${e.message}")
+            }
+        }
     }
 
     fun resetDailyReading() {
         _uiState.value = DailyReadingUiState(readingDate = getCurrentDate())
+        checkDailyReading()
     }
 
     fun clearError() {

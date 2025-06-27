@@ -6,6 +6,10 @@ import com.example.tarot.R
 
 object ImageResourceMapper {
 
+    // Get card back image resource
+    @DrawableRes
+    fun getCardBackResource(): Int = R.drawable.card_back
+
     // Map card names to drawable resource IDs
     @DrawableRes
     fun getCardImageResource(imageName: String): Int {
