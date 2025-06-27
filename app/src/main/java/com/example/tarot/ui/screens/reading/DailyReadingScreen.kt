@@ -5,14 +5,18 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -219,7 +223,7 @@ fun DailyReadingScreen(
                     uiState.dailyCard?.let { card ->
                         CardInterpretation(
                             card = card,
-                            formattedKeywords = viewModel.getFormattedKeywords(card)
+                            randomKeywords = viewModel.getRandomKeywords(card)
                         )
                     }
                 }
@@ -230,10 +234,11 @@ fun DailyReadingScreen(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CardInterpretation(
     card: TarotCard,
-    formattedKeywords: String
+    randomKeywords: List<String>
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -251,58 +256,45 @@ fun CardInterpretation(
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextAccent,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-
-            // Card Type and Suit
-            val cardInfo = buildString {
-                append(
-                    card.cardType.name.replace("_", " ").lowercase()
-                        .replaceFirstChar { it.uppercase() })
-                if (card.suit != null) {
-                    append(" • ${card.suit.name.lowercase().replaceFirstChar { it.uppercase() }}")
-                }
-            }
-
-            Text(
-                text = cardInfo,
-                fontSize = 12.sp,
-                color = TextSecondary,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
             // Keywords
             Text(
-                text = "Keywords",
+                text = "Key Insights",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = MysticGold,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
-            Text(
-                text = formattedKeywords,
-                fontSize = 14.sp,
-                color = TextSecondary,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-
-            // Meaning
-            Text(
-                text = "Meaning",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = MysticGold,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-
-            Text(
-                text = card.uprightMeaning,
-                fontSize = 14.sp,
-                color = TextPrimary,
-                lineHeight = 20.sp,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                randomKeywords.forEach { keyword ->
+                    Box(
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .background(
+                                color = MysticGold.copy(alpha = 0.2f),
+                                shape = RoundedCornerShape(16.dp)
+                            )
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = keyword,
+                            fontSize = 14.sp,
+                            color = TextPrimary,
+                            lineHeight = 20.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            }
 
             // Today's Message
             Text(

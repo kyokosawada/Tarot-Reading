@@ -152,4 +152,17 @@ class DailyReadingViewModel @Inject constructor(
     fun getFormattedKeywords(card: TarotCard): String {
         return card.getUprightKeywordsList().joinToString(" • ")
     }
+
+    // Helper function to get 3 random keywords for daily reading
+    fun getRandomKeywords(card: TarotCard): List<String> {
+        val allKeywords = card.getUprightKeywordsList()
+        return if (allKeywords.size <= 3) {
+            allKeywords
+        } else {
+            // Use consistent seed based on card ID and current date to ensure same keywords each time
+            val currentDate = getCurrentDate()
+            val seed = (card.id.toString() + currentDate).hashCode()
+            allKeywords.shuffled(kotlin.random.Random(seed)).take(3)
+        }
+    }
 }
