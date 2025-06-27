@@ -9,6 +9,7 @@ import com.example.tarot.data.dao.DailyReadingDao
 import com.example.tarot.data.dao.TarotCardDao
 import com.example.tarot.data.database.TarotDatabase
 import com.example.tarot.data.repository.TarotRepository
+
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -62,4 +63,6 @@ object DatabaseModule {
     fun provideFirebaseRepository(): FirebaseRepository {
         return FirebaseRepository()
     }
+
+
 }

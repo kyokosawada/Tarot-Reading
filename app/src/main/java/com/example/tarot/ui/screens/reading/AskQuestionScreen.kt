@@ -22,6 +22,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,6 +50,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.tarot.data.model.TarotReadingResponse
 import com.example.tarot.ui.components.MysticCardBack
 import com.example.tarot.ui.components.MysticCardFront
 import com.example.tarot.ui.theme.BackgroundEnd
@@ -61,28 +65,20 @@ import com.example.tarot.ui.theme.TarotTheme
 import com.example.tarot.ui.theme.TextAccent
 import com.example.tarot.ui.theme.TextPrimary
 import com.example.tarot.ui.theme.TextSecondary
+import com.example.tarot.viewmodel.AskQuestionViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AskQuestionScreen(
     onBackClick: () -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: AskQuestionViewModel = hiltViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
     var question by remember { mutableStateOf("") }
-    var isCardRevealed by remember { mutableStateOf(false) }
-    var showInterpretation by remember { mutableStateOf(false) }
-    var hasAskedQuestion by remember { mutableStateOf(false) }
-
-    // Function to reset the screen state
-    fun resetScreen() {
-        question = ""
-        isCardRevealed = false
-        showInterpretation = false
-        hasAskedQuestion = false
-    }
 
     val cardRotation by animateFloatAsState(
-        targetValue = if (isCardRevealed) 180f else 0f,
+        targetValue = if (uiState.isCardRevealed) 180f else 0f,
         animationSpec = tween(800),
         label = "cardFlip"
     )
@@ -138,103 +134,99 @@ fun AskQuestionScreen(
             ) {
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Question Section
-                if (!hasAskedQuestion) {
-                    QuestionInput(
-                        question = question,
-                        onQuestionChange = { question = it },
-                        onAskQuestion = {
-                            if (question.isNotBlank()) {
-                                hasAskedQuestion = true
-                            }
-                        }
-                    )
-                } else {
-                    // Show the question that was asked
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 32.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MysticPurple.copy(alpha = 0.6f)
-                        ),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(20.dp)
-                        ) {
-                            Text(
-                                text = "Your Question:",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MysticGold,
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            )
-
-                            Text(
-                                text = "\"$question\"",
-                                fontSize = 16.sp,
-                                color = TextPrimary,
-                                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                                lineHeight = 22.sp
-                            )
-                        }
-                    }
-
-                    // Reading Title
-                    Text(
-                        text = "The Universe Responds",
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextAccent,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-
-                    Text(
-                        text = "Tap the card to reveal your guidance",
-                        fontSize = 16.sp,
-                        color = TextSecondary,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(bottom = 48.dp)
-                    )
-
-                    // Tarot Card
-                    Box(
-                        modifier = Modifier
-                            .size(width = 220.dp, height = 350.dp)
-                            .clickable {
-                                if (!isCardRevealed) {
-                                    isCardRevealed = true
-                                    showInterpretation = true
-                                }
-                            }
-                            .graphicsLayer {
-                                rotationY = cardRotation
-                                cameraDistance = 12f * density
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (cardRotation <= 90f) {
-                            // Card Back
-                            MysticCardBack()
-                        } else {
-                            // Card Front - The High Priestess as example
-                            MysticCardFront(
-                                cardName = "The High Priestess",
-                                cardImage = "🌙"
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(48.dp))
+                // Show error if present
+                uiState.error?.let { error ->
+                    ErrorCard(error = error)
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                // Card Interpretation
-                if (showInterpretation) {
-                    QuestionCardInterpretation(
-                        question = question,
-                        onAskAnother = { resetScreen() }
+                // Question Section or Loading
+                when {
+                    uiState.isLoading -> {
+                        LoadingSection()
+                    }
+                    !uiState.hasAskedQuestion -> {
+                        QuestionInput(
+                            question = question,
+                            onQuestionChange = { question = it },
+                            onAskQuestion = {
+                                if (question.isNotBlank()) {
+                                    viewModel.askQuestion(question)
+                                }
+                            }
+                        )
+                    }
+
+                    else -> {
+                        // Show the question that was asked
+                        QuestionDisplay(question = uiState.reading?.question ?: question)
+
+                        // Reading Title
+                        Text(
+                            text = "The Universe Responds",
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextAccent,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+
+                        Text(
+                            text = "Tap the card to reveal your guidance",
+                            fontSize = 16.sp,
+                            color = TextSecondary,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(bottom = 48.dp)
+                        )
+
+                        // Tarot Card
+                        Box(
+                            modifier = Modifier
+                                .size(width = 220.dp, height = 350.dp)
+                                .clickable {
+                                    if (!uiState.isCardRevealed) {
+                                        viewModel.setCardRevealed(true)
+                                        viewModel.setShowInterpretation(true)
+                                    }
+                                }
+                                .graphicsLayer {
+                                    rotationY = cardRotation
+                                    cameraDistance = 12f * density
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (cardRotation <= 90f) {
+                                // Card Back
+                                MysticCardBack()
+                            } else {
+                                // Card Front with actual JPG image
+                                uiState.reading?.tarotCard?.let { tarotCard ->
+                                    MysticCardFront(tarotCard = tarotCard)
+                                } ?: run {
+                                    // Fallback to emoji version if no card data
+                                    MysticCardFront(
+                                        cardName = uiState.reading?.cardName
+                                            ?: "The High Priestess",
+                                        cardImage = getCardEmoji(
+                                            uiState.reading?.cardName ?: "The High Priestess"
+                                        )
+                                    )
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(48.dp))
+                    }
+                }
+
+                // Card Interpretation from AI
+                if (uiState.showInterpretation && uiState.reading != null) {
+                    AiCardInterpretation(
+                        reading = uiState.reading!!,
+                        onAskAnother = {
+                            question = ""
+                            viewModel.resetReading()
+                        }
                     )
                 }
             }
@@ -334,8 +326,8 @@ fun QuestionInput(
 }
 
 @Composable
-fun QuestionCardInterpretation(
-    question: String,
+fun AiCardInterpretation(
+    reading: TarotReadingResponse,
     onAskAnother: () -> Unit
 ) {
     Card(
@@ -349,7 +341,7 @@ fun QuestionCardInterpretation(
             modifier = Modifier.padding(24.dp)
         ) {
             Text(
-                text = "The High Priestess",
+                text = reading.cardName,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextAccent,
@@ -365,7 +357,7 @@ fun QuestionCardInterpretation(
             )
 
             Text(
-                text = "The High Priestess represents intuition, inner wisdom, and spiritual insight. She encourages you to trust your inner voice and look beyond the surface of situations.",
+                text = reading.cardMeaning,
                 fontSize = 14.sp,
                 color = TextPrimary,
                 lineHeight = 20.sp,
@@ -373,7 +365,7 @@ fun QuestionCardInterpretation(
             )
 
             Text(
-                text = "Guidance for Your Question",
+                text = "Guidance",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = MysticGold,
@@ -381,7 +373,7 @@ fun QuestionCardInterpretation(
             )
 
             Text(
-                text = "The answer you seek lies within you. Take time for quiet reflection and meditation. Your intuition holds the key to understanding this situation. Trust the subtle messages and signs that come to you. Sometimes the most profound wisdom comes from stillness and listening to your inner voice.",
+                text = reading.personalizedGuidance,
                 fontSize = 14.sp,
                 color = TextPrimary,
                 lineHeight = 20.sp,
@@ -411,6 +403,100 @@ fun QuestionCardInterpretation(
                 )
             }
         }
+    }
+}
+
+@Composable
+fun ErrorCard(error: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MysticPurple.copy(alpha = 0.3f)
+        ),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Text(
+            text = "⚠️ $error",
+            fontSize = 14.sp,
+            color = TextPrimary,
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Composable
+fun LoadingSection() {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(32.dp)
+    ) {
+        CircularProgressIndicator(
+            color = MysticGold,
+            modifier = Modifier.size(48.dp)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Consulting the cards...",
+            fontSize = 16.sp,
+            color = TextSecondary,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+fun QuestionDisplay(question: String) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 32.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MysticPurple.copy(alpha = 0.6f)
+        ),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp)
+        ) {
+            Text(
+                text = "Your Question:",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MysticGold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            Text(
+                text = "\"$question\"",
+                fontSize = 16.sp,
+                color = TextPrimary,
+                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                lineHeight = 22.sp
+            )
+        }
+    }
+}
+
+// Helper function to get emoji for card
+fun getCardEmoji(cardName: String): String {
+    return when {
+        cardName.contains("High Priestess", ignoreCase = true) -> "🌙"
+        cardName.contains("Fool", ignoreCase = true) -> "🌟"
+        cardName.contains("Magician", ignoreCase = true) -> "🔮"
+        cardName.contains("Empress", ignoreCase = true) -> "🌸"
+        cardName.contains("Emperor", ignoreCase = true) -> "👑"
+        cardName.contains("Tower", ignoreCase = true) -> "⚡"
+        cardName.contains("Star", ignoreCase = true) -> "⭐"
+        cardName.contains("Sun", ignoreCase = true) -> "☀️"
+        cardName.contains("Moon", ignoreCase = true) -> "🌙"
+        cardName.contains("Death", ignoreCase = true) -> "🦋"
+        cardName.contains("Strength", ignoreCase = true) -> "🦁"
+        cardName.contains("Justice", ignoreCase = true) -> "⚖️"
+        cardName.contains("Temperance", ignoreCase = true) -> "🌊"
+        cardName.contains("Devil", ignoreCase = true) -> "😈"
+        cardName.contains("Judgement", ignoreCase = true) -> "📯"
+        cardName.contains("World", ignoreCase = true) -> "🌍"
+        else -> "🔮"
     }
 }
 

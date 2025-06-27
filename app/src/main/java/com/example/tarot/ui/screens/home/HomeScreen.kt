@@ -52,7 +52,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.tarot.ui.components.MysticaLogoCompact
 import com.example.tarot.ui.theme.MysticCosmic
 import com.example.tarot.ui.theme.MysticDarkBlue
 import com.example.tarot.ui.theme.MysticGold
@@ -315,12 +314,44 @@ fun MysticNavigationDrawer(
                             )
                         )
                     )
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
+                    .padding(16.dp)
             ) {
-                MysticaLogoCompact(
-                    logoSize = 60
-                )
+                androidx.compose.foundation.layout.Row(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Logo on the left
+                    Image(
+                        painter = painterResource(id = com.example.tarot.R.drawable.mystica_logo),
+                        contentDescription = "Mystica Logo",
+                        modifier = Modifier.size(80.dp)
+                    )
+
+                    // Text on the right
+                    Column(
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "MYSTICA",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 24.sp,
+                            letterSpacing = 2.sp,
+                            color = TextAccent,
+                            modifier = Modifier.padding(bottom = 6.dp)
+                        )
+
+                        Text(
+                            text = "TAROT & DIVINATION",
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 11.sp,
+                            letterSpacing = 1.sp,
+                            color = MysticGold.copy(alpha = 0.8f),
+                            maxLines = 1
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
