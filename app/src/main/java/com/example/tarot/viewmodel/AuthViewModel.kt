@@ -6,17 +6,18 @@ import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.tarot.data.DummyAuthRepository
 import com.example.tarot.data.FirebaseRepository
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
 data class AuthUiState(
     val isLoading: Boolean = false,
@@ -39,18 +40,15 @@ data class User(
     val createdAt: Long? = null  // Timestamp when user joined
 )
 
-class AuthViewModel : ViewModel() {
+@HiltViewModel
+class AuthViewModel @Inject constructor(
+    private val firebaseRepository: FirebaseRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
     // Firebase Auth instance
     private val firebaseAuth = FirebaseAuth.getInstance()
-
-    // Firebase repository for Firestore operations
-    private val firebaseRepository = FirebaseRepository()
-
-    // Dummy data repository for testing
-    private val authRepository = DummyAuthRepository()
 
     // Web client ID from Firebase Console
     private val webClientId =

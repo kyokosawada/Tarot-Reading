@@ -1,5 +1,6 @@
 package com.example.tarot.data
 
+import com.example.tarot.data.model.TarotCard
 import com.example.tarot.viewmodel.TarotReading
 import com.example.tarot.viewmodel.User
 import com.example.tarot.viewmodel.UserStats
@@ -80,11 +81,12 @@ class FirebaseRepository {
                     mapOf(
                         "id" to card.id,
                         "name" to card.name,
-                        "suit" to card.suit,
-                        "number" to card.number,
-                        "isReversed" to card.isReversed,
-                        "meaning" to card.meaning,
-                        "imageUrl" to card.imageUrl
+                        "suit" to card.suit?.name,
+                        "cardType" to card.cardType.name,
+                        "uprightMeaning" to card.uprightMeaning,
+                        "reversedMeaning" to card.reversedMeaning,
+                        "imageName" to card.imageName,
+                        "dailyMessage" to card.dailyMessage
                     )
                 },
                 "interpretation" to reading.interpretation,
@@ -125,14 +127,31 @@ class FirebaseRepository {
                             title = data["title"] as? String ?: "",
                             date = data["date"] as? String ?: "",
                             cards = (data["cards"] as? List<Map<String, Any>>)?.map { cardData ->
-                                com.example.tarot.viewmodel.TarotCard(
-                                    id = cardData["id"] as? String ?: "",
+                                TarotCard(
+                                    id = (cardData["id"] as? Long)?.toInt() ?: 0,
                                     name = cardData["name"] as? String ?: "",
-                                    suit = cardData["suit"] as? String,
-                                    number = (cardData["number"] as? Long)?.toInt(),
-                                    isReversed = cardData["isReversed"] as? Boolean ?: false,
-                                    meaning = cardData["meaning"] as? String ?: "",
-                                    imageUrl = cardData["imageUrl"] as? String
+                                    suit = cardData["suit"]?.let {
+                                        try {
+                                            com.example.tarot.data.model.Suit.valueOf(it as String)
+                                        } catch (e: Exception) {
+                                            null
+                                        }
+                                    },
+                                    cardType = cardData["cardType"]?.let {
+                                        try {
+                                            com.example.tarot.data.model.CardType.valueOf(it as String)
+                                        } catch (e: Exception) {
+                                            com.example.tarot.data.model.CardType.MAJOR_ARCANA
+                                        }
+                                    } ?: com.example.tarot.data.model.CardType.MAJOR_ARCANA,
+                                    imageName = cardData["imageName"] as? String ?: "",
+                                    uprightMeaning = cardData["uprightMeaning"] as? String ?: "",
+                                    reversedMeaning = cardData["reversedMeaning"] as? String ?: "",
+                                    uprightKeywords = "",
+                                    reversedKeywords = "",
+                                    description = "",
+                                    dailyMessage = cardData["dailyMessage"] as? String ?: "",
+                                    numerology = null
                                 )
                             } ?: emptyList(),
                             interpretation = data["interpretation"] as? String ?: ""

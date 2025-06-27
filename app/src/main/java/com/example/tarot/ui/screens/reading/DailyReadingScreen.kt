@@ -17,20 +17,25 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -40,6 +45,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.tarot.data.model.TarotCard
 import com.example.tarot.ui.components.MysticCardBack
 import com.example.tarot.ui.components.MysticCardFront
 import com.example.tarot.ui.theme.BackgroundEnd
@@ -51,18 +58,28 @@ import com.example.tarot.ui.theme.TarotTheme
 import com.example.tarot.ui.theme.TextAccent
 import com.example.tarot.ui.theme.TextPrimary
 import com.example.tarot.ui.theme.TextSecondary
+import com.example.tarot.viewmodel.DailyReadingViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DailyReadingScreen(
     onBackClick: () -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: DailyReadingViewModel = hiltViewModel()
 ) {
-    var isCardRevealed by remember { mutableStateOf(false) }
-    var showInterpretation by remember { mutableStateOf(false) }
+    val uiState by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Show error messages
+    LaunchedEffect(uiState.errorMessage) {
+        uiState.errorMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            viewModel.clearError()
+        }
+    }
 
     val cardRotation by animateFloatAsState(
-        targetValue = if (isCardRevealed) 180f else 0f,
+        targetValue = if (uiState.isCardRevealed) 180f else 0f,
         animationSpec = tween(800),
         label = "cardFlip"
     )
@@ -93,6 +110,7 @@ fun DailyReadingScreen(
                 )
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = MysticDarkBlue
     ) { paddingValues ->
         Box(
@@ -128,47 +146,107 @@ fun DailyReadingScreen(
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
+                // Date
                 Text(
-                    text = "Tap the card to reveal your message",
-                    fontSize = 16.sp,
+                    text = uiState.readingDate,
+                    fontSize = 14.sp,
                     color = TextSecondary,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 48.dp)
+                    modifier = Modifier.padding(bottom = 16.dp)
                 )
 
-                // Tarot Card
-                Box(
-                    modifier = Modifier
-                        .size(width = 220.dp, height = 350.dp)
-                        .clickable {
-                            if (!isCardRevealed) {
-                                isCardRevealed = true
-                                showInterpretation = true
+                // Instruction text
+                when {
+                    uiState.dailyCard == null && !uiState.hasDrawnToday -> {
+                        Text(
+                            text = "Draw your card for today's guidance",
+                            fontSize = 16.sp,
+                            color = TextSecondary,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(bottom = 32.dp)
+                        )
+                    }
+
+                    uiState.dailyCard != null && !uiState.isCardRevealed -> {
+                        Text(
+                            text = "Tap the card to reveal your message",
+                            fontSize = 16.sp,
+                            color = TextSecondary,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(bottom = 32.dp)
+                        )
+                    }
+
+                    else -> {
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                }
+
+                // Loading indicator
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(
+                        color = MysticGold,
+                        modifier = Modifier.padding(32.dp)
+                    )
+                }
+
+                // Draw card button or card display
+                if (uiState.dailyCard == null && !uiState.isLoading) {
+                    Button(
+                        onClick = { viewModel.drawDailyCard() },
+                        modifier = Modifier
+                            .fillMaxWidth(0.7f)
+                            .height(56.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MysticGold,
+                            contentColor = MysticDarkBlue
+                        ),
+                        shape = RoundedCornerShape(28.dp)
+                    ) {
+                        Text(
+                            text = "Draw Your Daily Card",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                } else if (uiState.dailyCard != null) {
+                    // Tarot Card
+                    Box(
+                        modifier = Modifier
+                            .size(width = 220.dp, height = 350.dp)
+                            .clickable {
+                                if (!uiState.isCardRevealed) {
+                                    viewModel.revealCard()
+                                }
+                            }
+                            .graphicsLayer {
+                                rotationY = cardRotation
+                                cameraDistance = 12f * density
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (cardRotation <= 90f) {
+                            // Card Back
+                            MysticCardBack()
+                        } else {
+                            // Card Front - using actual JPG images
+                            uiState.dailyCard?.let { card ->
+                                MysticCardFront(tarotCard = card)
                             }
                         }
-                        .graphicsLayer {
-                            rotationY = cardRotation
-                            cameraDistance = 12f * density
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (cardRotation <= 90f) {
-                        // Card Back
-                        MysticCardBack()
-                    } else {
-                        // Card Front - The Sun card as example
-                        MysticCardFront(
-                            cardName = "The Sun",
-                            cardImage = "☀️"
-                        )
                     }
                 }
 
                 Spacer(modifier = Modifier.height(48.dp))
 
                 // Card Interpretation
-                if (showInterpretation) {
-                    CardInterpretation()
+                if (uiState.isCardRevealed && uiState.dailyCard != null) {
+                    uiState.dailyCard?.let { card ->
+                        CardInterpretation(
+                            card = card,
+                            formattedKeywords = viewModel.getFormattedKeywords(card)
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(32.dp))
@@ -178,7 +256,10 @@ fun DailyReadingScreen(
 }
 
 @Composable
-fun CardInterpretation() {
+fun CardInterpretation(
+    card: TarotCard,
+    formattedKeywords: String
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -189,14 +270,49 @@ fun CardInterpretation() {
         Column(
             modifier = Modifier.padding(24.dp)
         ) {
+            // Card Name
             Text(
-                text = "The Sun",
+                text = card.name,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextAccent,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            // Card Type and Suit
+            val cardInfo = buildString {
+                append(
+                    card.cardType.name.replace("_", " ").lowercase()
+                        .replaceFirstChar { it.uppercase() })
+                if (card.suit != null) {
+                    append(" • ${card.suit.name.lowercase().replaceFirstChar { it.uppercase() }}")
+                }
+            }
+
+            Text(
+                text = cardInfo,
+                fontSize = 12.sp,
+                color = TextSecondary,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
+            // Keywords
+            Text(
+                text = "Keywords",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MysticGold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            Text(
+                text = formattedKeywords,
+                fontSize = 14.sp,
+                color = TextSecondary,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            // Meaning
             Text(
                 text = "Meaning",
                 fontSize = 16.sp,
@@ -206,13 +322,14 @@ fun CardInterpretation() {
             )
 
             Text(
-                text = "The Sun represents joy, success, celebration, and positivity. This card brings optimism and good fortune to your day. You are entering a period of happiness and achievement.",
+                text = card.uprightMeaning,
                 fontSize = 14.sp,
                 color = TextPrimary,
                 lineHeight = 20.sp,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
+            // Today's Message
             Text(
                 text = "Today's Message",
                 fontSize = 16.sp,
@@ -222,12 +339,45 @@ fun CardInterpretation() {
             )
 
             Text(
-                text = "Embrace the positive energy around you. Share your light with others and watch how it multiplies. Success is within reach - trust in your abilities and let your authentic self shine through.",
+                text = card.dailyMessage,
                 fontSize = 14.sp,
                 color = TextPrimary,
                 lineHeight = 20.sp
             )
         }
+    }
+}
+
+// Helper function to get emoji for cards
+@Composable
+fun getCardEmoji(card: TarotCard): String {
+    return when {
+        card.name.contains("Sun") -> "☀️"
+        card.name.contains("Moon") -> "🌙"
+        card.name.contains("Star") -> "⭐"
+        card.name.contains("Death") -> "💀"
+        card.name.contains("Devil") -> "😈"
+        card.name.contains("Tower") -> "🗼"
+        card.name.contains("Fool") -> "🃏"
+        card.name.contains("Magician") -> "🎩"
+        card.name.contains("Priestess") -> "🔮"
+        card.name.contains("Empress") -> "👑"
+        card.name.contains("Emperor") -> "👑"
+        card.name.contains("Hierophant") -> "⛪"
+        card.name.contains("Lovers") -> "💕"
+        card.name.contains("Chariot") -> "🏹"
+        card.name.contains("Strength") -> "💪"
+        card.name.contains("Hermit") -> "🏮"
+        card.name.contains("Justice") -> "⚖️"
+        card.name.contains("Hanged") -> "🙃"
+        card.name.contains("Temperance") -> "🍷"
+        card.name.contains("Judgement") -> "📯"
+        card.name.contains("World") -> "🌍"
+        card.suit?.name == "CUPS" -> "🏆"
+        card.suit?.name == "SWORDS" -> "⚔️"
+        card.suit?.name == "WANDS" -> "🔥"
+        card.suit?.name == "PENTACLES" -> "💰"
+        else -> "🎴"
     }
 }
 

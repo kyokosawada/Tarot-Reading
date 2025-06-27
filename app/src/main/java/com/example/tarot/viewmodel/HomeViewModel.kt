@@ -3,12 +3,16 @@ package com.example.tarot.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tarot.data.FirebaseRepository
+import com.example.tarot.data.model.TarotCard
+import com.example.tarot.data.repository.TarotRepository
 import com.google.firebase.auth.FirebaseAuth
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class HomeUiState(
     val isLoading: Boolean = false,
@@ -33,15 +37,7 @@ data class TarotReading(
     val interpretation: String
 )
 
-data class TarotCard(
-    val id: String,
-    val name: String,
-    val suit: String?,
-    val number: Int?,
-    val isReversed: Boolean,
-    val meaning: String,
-    val imageUrl: String? = null
-)
+
 
 data class UserStats(
     val totalReadings: Int = 0,
@@ -50,11 +46,14 @@ data class UserStats(
     val experiencePoints: Int = 0
 )
 
-class HomeViewModel : ViewModel() {
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    private val firebaseRepository: FirebaseRepository,
+    private val tarotRepository: TarotRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
-    private val firebaseRepository = FirebaseRepository()
     private val auth = FirebaseAuth.getInstance()
 
     init {
@@ -144,10 +143,15 @@ class HomeViewModel : ViewModel() {
     fun refreshDailyInsight() {
         viewModelScope.launch {
             try {
+                _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
                 val newInsight = generateDailyInsight()
-                _uiState.value = _uiState.value.copy(dailyInsight = newInsight)
+                _uiState.value = _uiState.value.copy(
+                    dailyInsight = newInsight,
+                    isLoading = false
+                )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
+                    isLoading = false,
                     errorMessage = "Failed to refresh insight: ${e.message}"
                 )
             }
@@ -158,72 +162,30 @@ class HomeViewModel : ViewModel() {
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }
 
-    private fun generateDailyInsight(): DailyInsight {
-        val insights = listOf(
-            "Trust your intuition today. The universe is guiding you toward new opportunities.",
-            "Embrace change with an open heart. Today brings unexpected blessings.",
-            "Your inner wisdom is stronger than you realize. Listen to what it tells you.",
-            "A creative solution to an old problem will present itself today.",
-            "The path forward may seem unclear, but have faith in your journey.",
-            "Today is perfect for reflection and planning your next moves.",
-            "Your compassion will be your greatest strength today."
-        )
+    private suspend fun generateDailyInsight(): DailyInsight {
+        // Get a random tarot card for daily insight
+        val randomCard = tarotRepository.getRandomCard()
 
         return DailyInsight(
-            message = insights.random(),
+            message = randomCard.dailyMessage,
             date = getCurrentDate(),
             rating = (3..5).random()
         )
     }
 
-    private fun generateRecentReadings(): List<TarotReading> {
-        return listOf(
-            TarotReading(
-                id = "reading_1",
-                type = "love",
-                title = "Love & Relationships Reading",
-                date = "2024-01-15",
-                cards = generateSampleCards(3),
-                interpretation = "Your heart is opening to new possibilities. Trust the process of love."
-            ),
-            TarotReading(
-                id = "reading_2",
-                type = "career",
-                title = "Career Guidance",
-                date = "2024-01-14",
-                cards = generateSampleCards(1),
-                interpretation = "A new opportunity is approaching. Be ready to take action when it arrives."
-            ),
-            TarotReading(
-                id = "reading_3",
-                type = "general",
-                title = "General Life Reading",
-                date = "2024-01-13",
-                cards = generateSampleCards(3),
-                interpretation = "Balance is key in all areas of your life. Take time for self-care."
-            )
-        )
-    }
+
 
     private suspend fun loadUserStats(): UserStats {
         val userId = auth.currentUser?.uid
         return if (userId != null) {
-            firebaseRepository.getUserStats(userId).getOrNull() ?: generateUserStats()
+            firebaseRepository.getUserStats(userId).getOrNull() ?: UserStats()
         } else {
-            generateUserStats()
+            UserStats()
         }
     }
 
-    private fun generateUserStats(): UserStats {
-        return UserStats(
-            totalReadings = 47,
-            currentStreak = 12,
-            level = "Mystic",
-            experiencePoints = 850
-        )
-    }
 
-    private fun generateReading(type: String): TarotReading {
+    private suspend fun generateReading(type: String): TarotReading {
         val titles = mapOf(
             "love" to "Love & Relationships Reading",
             "career" to "Career & Finance Reading",
@@ -240,33 +202,22 @@ class HomeViewModel : ViewModel() {
             "quick" to "A brief but meaningful glimpse into your day ahead."
         )
 
+        // Get real cards from Room database
+        val cardCount = if (type == "quick") 1 else 3
+        val cards = tarotRepository.getRandomCards(cardCount)
+
         return TarotReading(
             id = "reading_${System.currentTimeMillis()}",
             type = type,
             title = titles[type] ?: "Tarot Reading",
             date = getCurrentDate(),
-            cards = generateSampleCards(if (type == "quick") 1 else 3),
+            cards = cards,
             interpretation = interpretations[type]
                 ?: "The cards offer guidance for your path forward."
         )
     }
 
-    private fun generateSampleCards(count: Int): List<TarotCard> {
-        val sampleCards = listOf(
-            TarotCard("1", "The Fool", "Major Arcana", 0, false, "New beginnings, spontaneity, innocence"),
-            TarotCard("2", "The Magician", "Major Arcana", 1, false, "Manifestation, resourcefulness, power"),
-            TarotCard("3", "The High Priestess", "Major Arcana", 2, false, "Intuition, sacred knowledge, subconscious"),
-            TarotCard("4", "The Empress", "Major Arcana", 3, false, "Femininity, beauty, nature, abundance"),
-            TarotCard("5", "The Emperor", "Major Arcana", 4, false, "Authority, structure, control, fatherhood"),
-            TarotCard("6", "The Hierophant", "Major Arcana", 5, false, "Spiritual wisdom, religious beliefs, conformity"),
-            TarotCard("7", "The Lovers", "Major Arcana", 6, false, "Love, harmony, relationships, values alignment"),
-            TarotCard("8", "The Chariot", "Major Arcana", 7, false, "Control, willpower, success, determination"),
-            TarotCard("9", "Strength", "Major Arcana", 8, false, "Inner strength, bravery, compassion, focus"),
-            TarotCard("10", "The Hermit", "Major Arcana", 9, false, "Soul searching, seeking inner guidance, introspection")
-        )
-        
-        return sampleCards.shuffled().take(count)
-    }
+
 
     private fun getCurrentDate(): String {
         return java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
