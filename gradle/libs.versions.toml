@@ -18,6 +18,7 @@ credentialsPlayServicesAuth = "1.5.0"
 googleid = "1.1.1"
 room = "2.6.1"
 hilt = "2.51.1"
+datastore = "1.1.1"
 # OpenAI and HTTP dependencies
 retrofit = "2.11.0"
 okhttp = "4.12.0"
@@ -25,6 +26,7 @@ gson = "2.11.0"
 
 [libraries]
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+androidx-datastore = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 
 # OpenAI and HTTP client
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }

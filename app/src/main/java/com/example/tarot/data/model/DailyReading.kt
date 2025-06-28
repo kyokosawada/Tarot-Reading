@@ -10,5 +10,6 @@ data class DailyReading(
     val cardId: Int,
     val cardName: String,
     val isRevealed: Boolean = false,
+    val isReversed: Boolean = false, // Track if card is drawn reversed
     val timestamp: Long = System.currentTimeMillis()
 )

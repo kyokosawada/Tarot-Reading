@@ -1,10 +1,13 @@
 package com.example.tarot.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tarot.data.model.DailyReading
 import com.example.tarot.data.model.TarotCard
+import com.example.tarot.data.model.getReversedKeywordsList
 import com.example.tarot.data.model.getUprightKeywordsList
+import com.example.tarot.data.repository.SettingsRepository
 import com.example.tarot.data.repository.TarotRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,6 +18,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
+import kotlin.random.Random
 
 data class DailyReadingUiState(
     val isLoading: Boolean = false,
@@ -23,18 +27,26 @@ data class DailyReadingUiState(
     val isCardRevealed: Boolean = false,
     val readingDate: String = "",
     val errorMessage: String? = null,
-    val hasDrawnToday: Boolean = false
+    val hasDrawnToday: Boolean = false,
+    val isReversed: Boolean = false,
+    val allowReversedCards: Boolean = false // Will be set from settings
 )
 
 @HiltViewModel
 class DailyReadingViewModel @Inject constructor(
-    private val tarotRepository: TarotRepository
+    private val tarotRepository: TarotRepository,
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DailyReadingUiState())
     val uiState: StateFlow<DailyReadingUiState> = _uiState.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            settingsRepository.allowReversedCards.collect { allowReversed ->
+                _uiState.value = _uiState.value.copy(allowReversedCards = allowReversed)
+            }
+        }
         checkDailyReading()
     }
 
@@ -55,7 +67,8 @@ class DailyReadingViewModel @Inject constructor(
                         dailyReading = existingReading,
                         isCardRevealed = existingReading.isRevealed,
                         readingDate = currentDate,
-                        hasDrawnToday = true
+                        hasDrawnToday = true,
+                        isReversed = existingReading.isReversed
                     )
                 } else {
                     // No reading for today, draw a new card
@@ -76,15 +89,25 @@ class DailyReadingViewModel @Inject constructor(
             try {
                 _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
 
-                println("DailyReadingViewModel: Drawing new daily card")
+                Log.d("DailyReadingViewModel", "Drawing new daily card")
 
                 // Get random card from database
                 val randomCard = tarotRepository.getRandomCard()
 
-                // Save daily reading to database
-                val dailyReading = tarotRepository.saveDailyReading(randomCard)
+                // Randomly determine if card is reversed (50/50 chance) when allowed by settings
+                val allowReversed = settingsRepository.getCurrentAllowReversedCards()
+                val isReversed = allowReversed && Random.nextBoolean()
 
-                println("DailyReadingViewModel: Successfully drew and saved card: ${randomCard.name}")
+                Log.d("DailyReadingViewModel", "Allow reversed cards: $allowReversed")
+                Log.d("DailyReadingViewModel", "Card is reversed: $isReversed")
+
+                // Save daily reading to database with orientation
+                val dailyReading = tarotRepository.saveDailyReading(randomCard, isReversed)
+
+                Log.d(
+                    "DailyReadingViewModel",
+                    "Successfully drew and saved card: ${randomCard.name} - ${if (isReversed) "Reversed" else "Upright"}"
+                )
 
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
@@ -93,6 +116,7 @@ class DailyReadingViewModel @Inject constructor(
                     isCardRevealed = false,
                     readingDate = getCurrentDate(),
                     hasDrawnToday = true,
+                    isReversed = isReversed,
                     errorMessage = null
                 )
 
@@ -100,8 +124,7 @@ class DailyReadingViewModel @Inject constructor(
                 tarotRepository.cleanupOldReadings(30)
 
             } catch (e: Exception) {
-                println("DailyReadingViewModel: Error drawing card: ${e.message}")
-                e.printStackTrace()
+                Log.e("DailyReadingViewModel", "Error drawing card", e)
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     errorMessage = "Failed to draw daily card: ${e.message}"
@@ -130,7 +153,7 @@ class DailyReadingViewModel @Inject constructor(
             } catch (e: Exception) {
                 // If database update fails, still update UI
                 _uiState.value = _uiState.value.copy(isCardRevealed = true)
-                println("Failed to update reading reveal status: ${e.message}")
+                Log.e("DailyReadingViewModel", "Failed to update reading reveal status", e)
             }
         }
     }
@@ -144,18 +167,39 @@ class DailyReadingViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }
 
+    fun toggleReversedCards() {
+        viewModelScope.launch {
+            val current = settingsRepository.getCurrentAllowReversedCards()
+            settingsRepository.setAllowReversedCards(!current)
+        }
+    }
+
+    fun setAllowReversedCards(allow: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setAllowReversedCards(allow)
+        }
+    }
+
     private fun getCurrentDate(): String {
         return SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(Date())
     }
 
     // Helper function to format card keywords
-    fun getFormattedKeywords(card: TarotCard): String {
-        return card.getUprightKeywordsList().joinToString(" • ")
+    fun getFormattedKeywords(card: TarotCard, isReversed: Boolean): String {
+        return if (isReversed) {
+            card.getReversedKeywordsList().joinToString(" • ")
+        } else {
+            card.getUprightKeywordsList().joinToString(" • ")
+        }
     }
 
     // Helper function to get 3 random keywords for daily reading
-    fun getRandomKeywords(card: TarotCard): List<String> {
-        val allKeywords = card.getUprightKeywordsList()
+    fun getRandomKeywords(card: TarotCard, isReversed: Boolean): List<String> {
+        val allKeywords = if (isReversed) {
+            card.getReversedKeywordsList()
+        } else {
+            card.getUprightKeywordsList()
+        }
         return if (allKeywords.size <= 3) {
             allKeywords
         } else {

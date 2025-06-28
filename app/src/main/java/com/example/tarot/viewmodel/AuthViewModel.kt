@@ -487,10 +487,22 @@ class AuthViewModel @Inject constructor(
     fun logout() {
         viewModelScope.launch {
             try {
+                _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
                 firebaseAuth.signOut()
-                _uiState.value = AuthUiState() // Reset to initial state
+                // Reset to logged out state without triggering initialization wait
+                _uiState.value = AuthUiState(
+                    isLoading = false,
+                    isInitializing = false,
+                    isLoggedIn = false,
+                    errorMessage = null,
+                    user = null,
+                    signupSuccess = false,
+                    successMessage = null,
+                    needsProfileCompletion = false
+                )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
+                    isLoading = false,
                     errorMessage = "Logout failed: ${e.message}"
                 )
             }

@@ -914,8 +914,12 @@ object TarotCardData {
         )
     )
 
-    fun getAllTarotCards(): List<TarotCard> =
+    // Cache the complete card list to avoid recreating it every time
+    private val allCards: List<TarotCard> by lazy {
         getMajorArcanaCards() + getCupsCards() + getPentaclesCards() + getSwordsCards() + getWandsCards()
+    }
+
+    fun getAllTarotCards(): List<TarotCard> = allCards
 
     fun getWandsCards(): List<TarotCard> = listOf(
         TarotCard(

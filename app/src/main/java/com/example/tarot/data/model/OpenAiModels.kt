@@ -48,7 +48,8 @@ data class TarotReadingResponse(
     val cardMeaning: String,
     val personalizedGuidance: String,
     val question: String,
-    val tarotCard: TarotCard // Add the full card object for images
+    val tarotCard: TarotCard, // Add the full card object for images
+    val isReversed: Boolean = false // Track if card is drawn reversed
 )
 
 // API Error Response

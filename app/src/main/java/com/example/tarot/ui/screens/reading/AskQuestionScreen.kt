@@ -205,15 +205,9 @@ fun AskQuestionScreen(
                             } else {
                                 // Card Front with actual JPG image
                                 uiState.reading?.tarotCard?.let { tarotCard ->
-                                    MysticCardFront(tarotCard = tarotCard)
-                                } ?: run {
-                                    // Fallback to emoji version if no card data
                                     MysticCardFront(
-                                        cardName = uiState.reading?.cardName
-                                            ?: "The High Priestess",
-                                        cardImage = getCardEmoji(
-                                            uiState.reading?.cardName ?: "The High Priestess"
-                                        )
+                                        tarotCard = tarotCard,
+                                        isReversed = uiState.reading?.isReversed ?: false
                                     )
                                 }
                             }
@@ -224,14 +218,16 @@ fun AskQuestionScreen(
                 }
 
                 // Card Interpretation from AI
-                if (uiState.showInterpretation && uiState.reading != null) {
-                    AiCardInterpretation(
-                        reading = uiState.reading!!,
-                        onAskAnother = {
-                            question = ""
-                            viewModel.resetReading()
-                        }
-                    )
+                uiState.reading?.let { reading ->
+                    if (uiState.showInterpretation) {
+                        AiCardInterpretation(
+                            reading = reading,
+                            onAskAnother = {
+                                question = ""
+                                viewModel.resetReading()
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -302,6 +298,8 @@ fun QuestionInput(
                         .height(120.dp)
                 )
 
+                Spacer(modifier = Modifier.height(16.dp))
+
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Button(
@@ -345,7 +343,7 @@ fun AiCardInterpretation(
             modifier = Modifier.padding(24.dp)
         ) {
             Text(
-                text = reading.cardName,
+                text = "${reading.cardName}${if (reading.isReversed) " (Reversed)" else ""}",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextAccent,
@@ -487,28 +485,6 @@ fun QuestionDisplay(question: String) {
     }
 }
 
-// Helper function to get emoji for card
-fun getCardEmoji(cardName: String): String {
-    return when {
-        cardName.contains("High Priestess", ignoreCase = true) -> "🌙"
-        cardName.contains("Fool", ignoreCase = true) -> "🌟"
-        cardName.contains("Magician", ignoreCase = true) -> "🔮"
-        cardName.contains("Empress", ignoreCase = true) -> "🌸"
-        cardName.contains("Emperor", ignoreCase = true) -> "👑"
-        cardName.contains("Tower", ignoreCase = true) -> "⚡"
-        cardName.contains("Star", ignoreCase = true) -> "⭐"
-        cardName.contains("Sun", ignoreCase = true) -> "☀️"
-        cardName.contains("Moon", ignoreCase = true) -> "🌙"
-        cardName.contains("Death", ignoreCase = true) -> "🦋"
-        cardName.contains("Strength", ignoreCase = true) -> "🦁"
-        cardName.contains("Justice", ignoreCase = true) -> "⚖️"
-        cardName.contains("Temperance", ignoreCase = true) -> "🌊"
-        cardName.contains("Devil", ignoreCase = true) -> "😈"
-        cardName.contains("Judgement", ignoreCase = true) -> "📯"
-        cardName.contains("World", ignoreCase = true) -> "🌍"
-        else -> "🔮"
-    }
-}
 
 @Preview(showBackground = true)
 @Composable

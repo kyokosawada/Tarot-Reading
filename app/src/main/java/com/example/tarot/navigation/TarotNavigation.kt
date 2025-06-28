@@ -26,6 +26,7 @@ import com.example.tarot.ui.screens.home.HomeScreen
 import com.example.tarot.ui.screens.home.ProfileScreen
 import com.example.tarot.ui.screens.reading.AskQuestionScreen
 import com.example.tarot.ui.screens.reading.DailyReadingScreen
+import com.example.tarot.ui.screens.settings.SettingsScreen
 import com.example.tarot.viewmodel.AuthViewModel
 
 // Navigation routes
@@ -37,6 +38,7 @@ object Routes {
     const val PROFILE_COMPLETION = "profile_completion"
     const val HOME = "home"
     const val PROFILE = "profile"
+    const val SETTINGS = "settings"
     const val DAILY_READING = "daily_reading"
     const val ASK_QUESTION = "ask_question"
 }
@@ -44,6 +46,7 @@ object Routes {
 // Animation constants
 private const val ANIMATION_DURATION = 400
 private const val FADE_DURATION = 200
+private const val TAG = "TarotNavigation"
 
 @Composable
 fun TarotNavigation(
@@ -57,40 +60,43 @@ fun TarotNavigation(
     LaunchedEffect(
         authUiState.isInitializing,
         authUiState.isLoggedIn,
-        authUiState.needsProfileCompletion,
-        authUiState.signupSuccess
+        authUiState.needsProfileCompletion
     ) {
         // Wait for initialization to complete
         if (!authUiState.isInitializing) {
-            when {
-                authUiState.signupSuccess -> {
-                    navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.SIGN_UP) { inclusive = true }
-                    }
-                }
-                authUiState.isLoggedIn && authUiState.needsProfileCompletion -> {
-                    navController.navigate(Routes.PROFILE_COMPLETION) {
-                        popUpTo(Routes.SPLASH) { inclusive = true }
-                    }
-                }
-                authUiState.isLoggedIn && !authUiState.needsProfileCompletion -> {
-                    navController.navigate(Routes.HOME) {
-                        popUpTo(Routes.SPLASH) { inclusive = true }
-                    }
-                }
-                !authUiState.isLoggedIn -> {
-                    val currentRoute = navController.currentBackStackEntry?.destination?.route
-                    if (currentRoute !in listOf(
-                            Routes.LOGIN,
-                            Routes.SIGN_UP,
-                            Routes.FORGOT_PASSWORD
-                        )
-                    ) {
+            try {
+                when {
+                    authUiState.signupSuccess -> {
                         navController.navigate(Routes.LOGIN) {
-                            popUpTo(Routes.SPLASH) { inclusive = true }
+                            popUpTo(Routes.SIGN_UP) { inclusive = true }
+                        }
+                    }
+                    authUiState.isLoggedIn && authUiState.needsProfileCompletion -> {
+                        navController.navigate(Routes.PROFILE_COMPLETION) {
+                            popUpTo(0) { inclusive = true } // Clear entire back stack
+                        }
+                    }
+                    authUiState.isLoggedIn && !authUiState.needsProfileCompletion -> {
+                        val currentRoute = navController.currentBackStackEntry?.destination?.route
+                        if (currentRoute != Routes.HOME) {
+                            navController.navigate(Routes.HOME) {
+                                popUpTo(0) { inclusive = true } // Clear entire back stack
+                            }
+                        }
+                    }
+                    !authUiState.isLoggedIn -> {
+                        val currentRoute = navController.currentBackStackEntry?.destination?.route
+                        // Navigate to login from any screen when logged out, including splash
+                        if (currentRoute != Routes.LOGIN && currentRoute != Routes.SIGN_UP && currentRoute != Routes.FORGOT_PASSWORD) {
+                            navController.navigate(Routes.LOGIN) {
+                                popUpTo(0) { inclusive = true } // Clear entire back stack
+                            }
                         }
                     }
                 }
+            } catch (e: Exception) {
+                // Log navigation errors but don't crash the app
+                android.util.Log.e(TAG, "Navigation error", e)
             }
         }
     }
@@ -315,9 +321,39 @@ fun TarotNavigation(
                     onEditProfileClick = {
                         // Handle edit profile
                     },
+                    onSettingsClick = {
+                        navController.navigate(Routes.SETTINGS)
+                    },
                     onLogoutClick = {
                         authViewModel.clearMessages()
                         authViewModel.logout()
+                    }
+                )
+
+                // Handle back press
+                BackHandler {
+                    navController.popBackStack()
+                }
+            }
+
+            composable(
+                route = Routes.SETTINGS,
+                enterTransition = {
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Left,
+                        animationSpec = tween(ANIMATION_DURATION)
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(ANIMATION_DURATION)
+                    )
+                }
+            ) {
+                SettingsScreen(
+                    onBackClick = {
+                        navController.popBackStack()
                     }
                 )
 

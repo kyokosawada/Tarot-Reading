@@ -210,7 +210,10 @@ fun DailyReadingScreen(
                         } else {
                             // Card Front - using actual JPG images
                             uiState.dailyCard?.let { card ->
-                                MysticCardFront(tarotCard = card)
+                                MysticCardFront(
+                                    tarotCard = card,
+                                    isReversed = uiState.dailyReading?.isReversed ?: false
+                                )
                             }
                         }
                     }
@@ -223,7 +226,11 @@ fun DailyReadingScreen(
                     uiState.dailyCard?.let { card ->
                         CardInterpretation(
                             card = card,
-                            randomKeywords = viewModel.getRandomKeywords(card)
+                            isReversed = uiState.dailyReading?.isReversed ?: false,
+                            randomKeywords = viewModel.getRandomKeywords(
+                                card,
+                                uiState.dailyReading?.isReversed ?: false
+                            )
                         )
                     }
                 }
@@ -238,6 +245,7 @@ fun DailyReadingScreen(
 @Composable
 fun CardInterpretation(
     card: TarotCard,
+    isReversed: Boolean,
     randomKeywords: List<String>
 ) {
     Card(
@@ -252,7 +260,7 @@ fun CardInterpretation(
         ) {
             // Card Name
             Text(
-                text = card.name,
+                text = if (isReversed) "${card.name} (Reversed)" else card.name,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextAccent,
@@ -306,7 +314,7 @@ fun CardInterpretation(
             )
 
             Text(
-                text = card.dailyMessage,
+                text = if (isReversed) card.reversedMeaning else card.dailyMessage,
                 fontSize = 14.sp,
                 color = TextPrimary,
                 lineHeight = 20.sp
@@ -315,38 +323,6 @@ fun CardInterpretation(
     }
 }
 
-// Helper function to get emoji for cards
-@Composable
-fun getCardEmoji(card: TarotCard): String {
-    return when {
-        card.name.contains("Sun") -> "☀️"
-        card.name.contains("Moon") -> "🌙"
-        card.name.contains("Star") -> "⭐"
-        card.name.contains("Death") -> "💀"
-        card.name.contains("Devil") -> "😈"
-        card.name.contains("Tower") -> "🗼"
-        card.name.contains("Fool") -> "🃏"
-        card.name.contains("Magician") -> "🎩"
-        card.name.contains("Priestess") -> "🔮"
-        card.name.contains("Empress") -> "👑"
-        card.name.contains("Emperor") -> "👑"
-        card.name.contains("Hierophant") -> "⛪"
-        card.name.contains("Lovers") -> "💕"
-        card.name.contains("Chariot") -> "🏹"
-        card.name.contains("Strength") -> "💪"
-        card.name.contains("Hermit") -> "🏮"
-        card.name.contains("Justice") -> "⚖️"
-        card.name.contains("Hanged") -> "🙃"
-        card.name.contains("Temperance") -> "🍷"
-        card.name.contains("Judgement") -> "📯"
-        card.name.contains("World") -> "🌍"
-        card.suit?.name == "CUPS" -> "🏆"
-        card.suit?.name == "SWORDS" -> "⚔️"
-        card.suit?.name == "WANDS" -> "🔥"
-        card.suit?.name == "PENTACLES" -> "💰"
-        else -> "🎴"
-    }
-}
 
 @Preview(showBackground = true)
 @Composable

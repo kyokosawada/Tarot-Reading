@@ -61,6 +61,7 @@ fun ProfileScreen(
     authViewModel: AuthViewModel,
     onBackClick: () -> Unit = {},
     onEditProfileClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -107,11 +108,16 @@ fun ProfileScreen(
                 }
 
                 item {
-                    PreferencesSection()
+                    PreferencesSection(
+                        onSettingsClick = onSettingsClick
+                    )
                 }
 
                 item {
-                    AccountSection(onLogoutClick = onLogoutClick)
+                    AccountSection(
+                        onLogoutClick = onLogoutClick,
+                        isLoading = authUiState.isLoading
+                    )
                 }
             }
         } else {
@@ -281,6 +287,7 @@ fun StatItem(
 
 @Composable
 fun PreferencesSection(
+    onSettingsClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -314,7 +321,7 @@ fun PreferencesSection(
                 icon = Icons.Default.Settings,
                 title = "App Settings",
                 subtitle = "Customize your experience",
-                onClick = { }
+                onClick = onSettingsClick
             )
         }
     }
@@ -323,7 +330,8 @@ fun PreferencesSection(
 @Composable
 fun AccountSection(
     onLogoutClick: () -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isLoading: Boolean = false
 ) {
     Card(
         modifier = modifier.fillMaxWidth()
@@ -357,16 +365,25 @@ fun AccountSection(
             Button(
                 onClick = onLogoutClick,
                 modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.error
                 )
             ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                    contentDescription = null,
-                    modifier = Modifier.padding(end = 8.dp)
-                )
-                Text("Sign Out")
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = MaterialTheme.colorScheme.onError,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                        contentDescription = null,
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
+                    Text("Sign Out")
+                }
             }
         }
     }
@@ -498,6 +515,6 @@ fun PreferencesSectionPreview() {
 @Composable
 fun AccountSectionPreview() {
     TarotTheme {
-        AccountSection()
+        AccountSection(isLoading = false)
     }
 }

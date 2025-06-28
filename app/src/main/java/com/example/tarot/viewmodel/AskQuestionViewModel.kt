@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tarot.data.model.TarotReadingResponse
 import com.example.tarot.data.repository.OpenAiRepository
+import com.example.tarot.data.repository.SettingsRepository
 import com.example.tarot.util.ApiKeyManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AskQuestionViewModel @Inject constructor(
-    private val openAiRepository: OpenAiRepository
+    private val openAiRepository: OpenAiRepository,
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AskQuestionUiState())
@@ -25,15 +27,21 @@ class AskQuestionViewModel @Inject constructor(
     fun askQuestion(question: String, apiKey: String? = null) {
         if (question.isBlank()) return
 
+        lastQuestion = question // Store for retry
+
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
                 isLoading = true,
                 error = null
             )
 
+            // Get current settings
+            val allowReversed = settingsRepository.getCurrentAllowReversedCards()
+
             val result = openAiRepository.getPersonalizedTarotReading(
                 question = question,
-                apiKey = apiKey ?: ApiKeyManager.getOpenAiApiKey()
+                apiKey = apiKey ?: ApiKeyManager.getOpenAiApiKey(),
+                allowReversed = allowReversed
             )
 
             result.fold(
@@ -77,6 +85,19 @@ class AskQuestionViewModel @Inject constructor(
 
     fun clearError() {
         _uiState.value = _uiState.value.copy(error = null)
+    }
+
+    fun toggleReversedCards() {
+        viewModelScope.launch {
+            val current = settingsRepository.getCurrentAllowReversedCards()
+            settingsRepository.setAllowReversedCards(!current)
+        }
+    }
+
+    fun setAllowReversedCards(allow: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setAllowReversedCards(allow)
+        }
     }
 }
 

@@ -78,6 +78,9 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
     
+    // DataStore for settings
+    implementation(libs.androidx.datastore)
+    
     // Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:33.15.0"))
     implementation("com.google.firebase:firebase-auth")

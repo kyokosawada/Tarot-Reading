@@ -16,6 +16,7 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.random.Random
 
 @Singleton
 class OpenAiRepository @Inject constructor(
@@ -28,7 +29,8 @@ class OpenAiRepository @Inject constructor(
     }
     suspend fun getPersonalizedTarotReading(
         question: String,
-        apiKey: String = ApiKeyManager.getOpenAiApiKey()
+        apiKey: String = ApiKeyManager.getOpenAiApiKey(),
+        allowReversed: Boolean = true
     ): Result<TarotReadingResponse> {
         return try {
             // Check if API key is configured
@@ -47,11 +49,16 @@ class OpenAiRepository @Inject constructor(
             
             // Get a random tarot card
             val randomCard = tarotRepository.getRandomCard()
-            Log.d(TAG, "Selected card: ${randomCard.name}")
+            // Randomly determine if card is reversed (50/50 chance) when allowed
+            val isReversed = allowReversed && Random.nextBoolean()
+            Log.d(
+                TAG,
+                "Selected card: ${randomCard.name} - ${if (isReversed) "Reversed" else "Upright"} (Allow reversed: $allowReversed)"
+            )
 
             // Create personalized prompt
             val systemPrompt = createSystemPrompt()
-            val userPrompt = createUserPrompt(question, randomCard)
+            val userPrompt = createUserPrompt(question, randomCard, isReversed)
 
             val request = OpenAiRequest(
                 messages = listOf(
@@ -73,7 +80,7 @@ class OpenAiRepository @Inject constructor(
                     ?: return Result.failure(Exception("No response from AI"))
 
                 // Parse the AI response to extract structured data
-                val tarotReading = parseAiResponse(content, question, randomCard)
+                val tarotReading = parseAiResponse(content, question, randomCard, isReversed)
                 Log.d(TAG, "Successfully parsed AI response")
 
                 Result.success(tarotReading)
@@ -131,13 +138,16 @@ class OpenAiRepository @Inject constructor(
         """.trimIndent()
     }
 
-    private fun createUserPrompt(question: String, card: TarotCard): String {
+    private fun createUserPrompt(question: String, card: TarotCard, isReversed: Boolean): String {
+        val cardMeaning = if (isReversed) card.reversedMeaning else card.uprightMeaning
+        val orientation = if (isReversed) "Reversed" else "Upright"
+
         return """
             The user asks: "$question"
             
-            The drawn tarot card is: ${card.name}
+            The drawn tarot card is: ${card.name} ($orientation)
             Card Description: ${card.description}
-            Upright Meaning: ${card.uprightMeaning}
+            ${orientation} Meaning: $cardMeaning
             
             Please provide a personalized tarot reading in the specified JSON format.
         """.trimIndent()
@@ -146,7 +156,8 @@ class OpenAiRepository @Inject constructor(
     private fun parseAiResponse(
         content: String,
         question: String,
-        card: TarotCard
+        card: TarotCard,
+        isReversed: Boolean
     ): TarotReadingResponse {
         return try {
             // Try to extract JSON from the response
@@ -159,22 +170,25 @@ class OpenAiRepository @Inject constructor(
                 val cardMeaning = extractJsonValue(jsonContent, "cardMeaning")
                 val personalizedGuidance = extractJsonValue(jsonContent, "personalizedGuidance")
 
+                val fallbackMeaning = if (isReversed) card.reversedMeaning else card.uprightMeaning
+
                 TarotReadingResponse(
                     cardName = card.name,
-                    cardMeaning = cardMeaning.ifEmpty { card.uprightMeaning },
+                    cardMeaning = cardMeaning.ifEmpty { fallbackMeaning },
                     personalizedGuidance = personalizedGuidance.ifEmpty {
-                        createFallbackGuidance(question, card)
+                        createFallbackGuidance(question, card, isReversed)
                     },
                     question = question,
-                    tarotCard = card // Include the full card object
+                    tarotCard = card, // Include the full card object
+                    isReversed = isReversed
                 )
             } else {
                 // Fallback if JSON parsing fails
-                createFallbackReading(content, question, card)
+                createFallbackReading(content, question, card, isReversed)
             }
         } catch (e: Exception) {
             // Fallback reading
-            createFallbackReading(content, question, card)
+            createFallbackReading(content, question, card, isReversed)
         }
     }
 
@@ -186,20 +200,31 @@ class OpenAiRepository @Inject constructor(
     private fun createFallbackReading(
         content: String,
         question: String,
-        card: TarotCard
+        card: TarotCard,
+        isReversed: Boolean
     ): TarotReadingResponse {
+        val cardMeaning = if (isReversed) card.reversedMeaning else card.uprightMeaning
+
         return TarotReadingResponse(
             cardName = card.name,
-            cardMeaning = card.uprightMeaning,
+            cardMeaning = cardMeaning,
             personalizedGuidance = content.take(300) + "...",
             question = question,
-            tarotCard = card // Include the full card object
+            tarotCard = card, // Include the full card object
+            isReversed = isReversed
         )
     }
 
-    private fun createFallbackGuidance(question: String, card: TarotCard): String {
-        return "The ${card.name} appears in response to your question about ${question.lowercase()}. " +
-                "${card.uprightMeaning} Consider how this energy relates to your current situation and " +
+    private fun createFallbackGuidance(
+        question: String,
+        card: TarotCard,
+        isReversed: Boolean
+    ): String {
+        val cardMeaning = if (isReversed) card.reversedMeaning else card.uprightMeaning
+        val orientation = if (isReversed) "reversed" else "upright"
+
+        return "The ${card.name} appears ${orientation} in response to your question about ${question.lowercase()}. " +
+                "$cardMeaning Consider how this energy relates to your current situation and " +
                 "trust your intuition to guide you forward."
     }
 }

@@ -60,6 +60,7 @@ fun MysticCardBack(
 @Composable
 fun MysticCardFront(
     tarotCard: TarotCard,
+    isReversed: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val imageResource = ImageResourceMapper.getCardImageResource(tarotCard.imageName)
@@ -69,16 +70,42 @@ fun MysticCardFront(
             .fillMaxSize()
             .clip(RoundedCornerShape(20.dp))
             .graphicsLayer {
-                rotationY = 180f // Flip to show correctly
+                // Only apply the base flip for card reveal - rotation for reversed is separate
+                rotationY = 180f
+                // Apply reversed rotation only when card is actually reversed
+                rotationZ = if (isReversed) 180f else 0f
             },
         contentAlignment = Alignment.Center
     ) {
         Image(
             painter = painterResource(imageResource),
-            contentDescription = tarotCard.name,
+            contentDescription = "${tarotCard.name}${if (isReversed) " (Reversed)" else ""}",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )
+
+        // Add visual indicator for reversed cards
+        if (isReversed) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp),
+                contentAlignment = Alignment.TopEnd
+            ) {
+                Text(
+                    text = "R",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MysticLightGold,
+                    modifier = Modifier
+                        .background(
+                            color = MysticDarkBlue.copy(alpha = 0.8f),
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                )
+            }
+        }
     }
 }
 
@@ -89,6 +116,7 @@ fun MysticCardFront(
 fun MysticCardFront(
     cardName: String,
     cardImage: String,
+    isReversed: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -109,7 +137,9 @@ fun MysticCardFront(
                 shape = RoundedCornerShape(20.dp)
             )
             .graphicsLayer {
-                rotationY = 180f // Flip to show correctly
+                // Base flip to show correctly, plus additional 180° if reversed
+                rotationY = 180f
+                rotationZ = if (isReversed) 180f else 0f
             },
         contentAlignment = Alignment.Center
     ) {

@@ -105,8 +105,8 @@ object ImageResourceMapper {
             "tarot_queen_of_wands" -> R.drawable.tarot_queen_of_wands
             "tarot_king_of_wands" -> R.drawable.tarot_king_of_wands
 
-            // Fallback for unknown cards
-            else -> R.drawable.ic_launcher_foreground
+            // Fallback for unknown cards - use card back as placeholder
+            else -> R.drawable.card_back
         }
     }
 

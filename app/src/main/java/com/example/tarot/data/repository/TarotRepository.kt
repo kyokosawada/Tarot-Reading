@@ -78,13 +78,14 @@ class TarotRepository @Inject constructor(
         return dailyReadingDao.getDailyReadingByDate(todayDate)
     }
 
-    suspend fun saveDailyReading(card: TarotCard): DailyReading {
+    suspend fun saveDailyReading(card: TarotCard, isReversed: Boolean = false): DailyReading {
         val todayDate = getTodayDateString()
         val dailyReading = DailyReading(
             date = todayDate,
             cardId = card.id,
             cardName = card.name,
-            isRevealed = false
+            isRevealed = false,
+            isReversed = isReversed
         )
         dailyReadingDao.insertDailyReading(dailyReading)
         return dailyReading
