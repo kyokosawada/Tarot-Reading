@@ -20,6 +20,8 @@ class AskQuestionViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(AskQuestionUiState())
     val uiState: StateFlow<AskQuestionUiState> = _uiState.asStateFlow()
 
+    private var lastQuestion: String = "" // Store last question for retry
+
     fun askQuestion(question: String, apiKey: String? = null) {
         if (question.isBlank()) return
 
@@ -56,6 +58,7 @@ class AskQuestionViewModel @Inject constructor(
 
     fun resetReading() {
         _uiState.value = AskQuestionUiState()
+        lastQuestion = ""
     }
 
     fun setCardRevealed(revealed: Boolean) {
@@ -64,6 +67,16 @@ class AskQuestionViewModel @Inject constructor(
 
     fun setShowInterpretation(show: Boolean) {
         _uiState.value = _uiState.value.copy(showInterpretation = show)
+    }
+
+    fun retryLastQuestion() {
+        if (lastQuestion.isNotBlank()) {
+            askQuestion(lastQuestion)
+        }
+    }
+
+    fun clearError() {
+        _uiState.value = _uiState.value.copy(error = null)
     }
 }
 

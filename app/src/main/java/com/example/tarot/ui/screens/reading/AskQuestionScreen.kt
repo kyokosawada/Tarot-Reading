@@ -4,6 +4,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -183,7 +184,10 @@ fun AskQuestionScreen(
                         Box(
                             modifier = Modifier
                                 .size(width = 220.dp, height = 350.dp)
-                                .clickable {
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                ) {
                                     if (!uiState.isCardRevealed) {
                                         viewModel.setCardRevealed(true)
                                         viewModel.setShowInterpretation(true)
@@ -407,19 +411,25 @@ fun AiCardInterpretation(
 }
 
 @Composable
-fun ErrorCard(error: String) {
+fun ErrorCard(
+    error: String,
+    onRetry: (() -> Unit)? = null
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MysticPurple.copy(alpha = 0.3f)
+            containerColor = androidx.compose.ui.graphics.Color.Red.copy(alpha = 0.8f)
         ),
         shape = RoundedCornerShape(16.dp)
     ) {
         Text(
             text = "⚠️ $error",
             fontSize = 14.sp,
-            color = TextPrimary,
-            modifier = Modifier.padding(16.dp)
+            color = androidx.compose.ui.graphics.Color.White,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
         )
     }
 }

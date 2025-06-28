@@ -24,22 +24,7 @@ abstract class TarotDatabase : RoomDatabase() {
     abstract fun tarotCardDao(): TarotCardDao
     abstract fun dailyReadingDao(): DailyReadingDao
 
-    companion object {
-        @Volatile
-        private var INSTANCE: TarotDatabase? = null
 
-        fun getDatabase(context: Context): TarotDatabase {
-            return INSTANCE ?: synchronized(this) {
-                val instance = Room.databaseBuilder(
-                    context.applicationContext,
-                    TarotDatabase::class.java,
-                    "tarot_database"
-                ).build()
-                INSTANCE = instance
-                instance
-            }
-        }
-    }
 }
 
 class Converters {

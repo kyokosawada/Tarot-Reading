@@ -1,19 +1,31 @@
 package com.example.tarot.data.repository
 
+import android.content.Context
+import android.util.Log
 import com.example.tarot.data.api.OpenAiApiService
 import com.example.tarot.data.model.ChatMessage
 import com.example.tarot.data.model.OpenAiRequest
 import com.example.tarot.data.model.TarotCard
 import com.example.tarot.data.model.TarotReadingResponse
 import com.example.tarot.util.ApiKeyManager
+import com.example.tarot.util.NetworkUtils
+import dagger.hilt.android.qualifiers.ApplicationContext
+import java.io.IOException
+import java.net.ConnectException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class OpenAiRepository @Inject constructor(
     private val openAiApiService: OpenAiApiService,
-    private val tarotRepository: TarotRepository
+    private val tarotRepository: TarotRepository,
+    @ApplicationContext private val context: Context
 ) {
+    companion object {
+        private const val TAG = "OpenAiRepository"
+    }
     suspend fun getPersonalizedTarotReading(
         question: String,
         apiKey: String = ApiKeyManager.getOpenAiApiKey()
@@ -21,10 +33,21 @@ class OpenAiRepository @Inject constructor(
         return try {
             // Check if API key is configured
             if (!ApiKeyManager.isApiKeyConfigured()) {
+                Log.w(TAG, "OpenAI API key not configured")
                 return Result.failure(Exception("OpenAI API key not configured. Please add your API key to use this feature."))
             }
+            
+            // Check network connectivity first
+            if (!NetworkUtils.isNetworkAvailable(context)) {
+                Log.w(TAG, "No network connection")
+                return Result.failure(Exception("No internet connection"))
+            }
+            
+            Log.d(TAG, "Starting personalized tarot reading for question: ${question.take(50)}...")
+            
             // Get a random tarot card
             val randomCard = tarotRepository.getRandomCard()
+            Log.d(TAG, "Selected card: ${randomCard.name}")
 
             // Create personalized prompt
             val systemPrompt = createSystemPrompt()
@@ -37,25 +60,53 @@ class OpenAiRepository @Inject constructor(
                 )
             )
 
+            Log.d(TAG, "Making API call to OpenAI...")
             val response = openAiApiService.createChatCompletion(
                 authorization = "Bearer $apiKey",
                 request = request
             )
 
             if (response.isSuccessful) {
+                Log.d(TAG, "API call successful")
                 val aiResponse = response.body()
                 val content = aiResponse?.choices?.firstOrNull()?.message?.content
                     ?: return Result.failure(Exception("No response from AI"))
 
                 // Parse the AI response to extract structured data
                 val tarotReading = parseAiResponse(content, question, randomCard)
+                Log.d(TAG, "Successfully parsed AI response")
 
                 Result.success(tarotReading)
             } else {
-                Result.failure(Exception("API Error: ${response.code()} ${response.message()}"))
+                val errorMsg = when (response.code()) {
+                    401 -> "Invalid API key"
+                    429 -> "Rate limit exceeded"
+                    500, 502, 503 -> "Server unavailable"
+                    else -> "API Error: ${response.code()}"
+                }
+                Log.e(TAG, errorMsg)
+                Result.failure(Exception(errorMsg))
             }
+        } catch (e: UnknownHostException) {
+            val errorMsg = NetworkUtils.getNetworkErrorMessage(e)
+            Log.e(TAG, "Network error - UnknownHostException", e)
+            Result.failure(Exception(errorMsg))
+        } catch (e: ConnectException) {
+            val errorMsg = NetworkUtils.getNetworkErrorMessage(e)
+            Log.e(TAG, "Network error - ConnectException", e)
+            Result.failure(Exception(errorMsg))
+        } catch (e: SocketTimeoutException) {
+            val errorMsg = NetworkUtils.getNetworkErrorMessage(e)
+            Log.e(TAG, "Network error - SocketTimeoutException", e)
+            Result.failure(Exception(errorMsg))
+        } catch (e: IOException) {
+            val errorMsg = NetworkUtils.getNetworkErrorMessage(e)
+            Log.e(TAG, "Network error - IOException", e)
+            Result.failure(Exception(errorMsg))
         } catch (e: Exception) {
-            Result.failure(e)
+            val errorMsg = NetworkUtils.getNetworkErrorMessage(e)
+            Log.e(TAG, "Unexpected error during tarot reading", e)
+            Result.failure(Exception(errorMsg))
         }
     }
 
