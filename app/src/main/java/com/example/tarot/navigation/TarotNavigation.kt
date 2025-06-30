@@ -56,6 +56,7 @@ fun TarotNavigation(
     val navController = rememberNavController()
     val context = LocalContext.current
 
+
     // Handle authentication state changes after initialization
     LaunchedEffect(
         authUiState.isInitializing,
@@ -257,7 +258,12 @@ fun TarotNavigation(
                 route = Routes.HOME,
                 enterTransition = {
                     when (initialState.destination.route) {
-                        Routes.PROFILE, Routes.DAILY_READING, Routes.ASK_QUESTION -> slideIntoContainer(
+                        Routes.PROFILE, Routes.SETTINGS -> slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Down,
+                            animationSpec = tween(ANIMATION_DURATION)
+                        )
+
+                        Routes.DAILY_READING, Routes.ASK_QUESTION -> slideIntoContainer(
                             AnimatedContentTransitionScope.SlideDirection.Right,
                             animationSpec = tween(ANIMATION_DURATION)
                         )
@@ -267,7 +273,7 @@ fun TarotNavigation(
                 },
                 exitTransition = {
                     when (targetState.destination.route) {
-                        Routes.PROFILE -> slideOutOfContainer(
+                        Routes.PROFILE, Routes.SETTINGS -> slideOutOfContainer(
                             AnimatedContentTransitionScope.SlideDirection.Up,
                             animationSpec = tween(ANIMATION_DURATION)
                         )
@@ -282,6 +288,7 @@ fun TarotNavigation(
                 }
             ) {
                 HomeScreen(
+                    authViewModel = authViewModel,
                     onNavigateToReading = { readingType ->
                         val route = when (readingType) {
                             "daily" -> Routes.DAILY_READING
@@ -340,13 +347,13 @@ fun TarotNavigation(
                 route = Routes.SETTINGS,
                 enterTransition = {
                     slideIntoContainer(
-                        AnimatedContentTransitionScope.SlideDirection.Left,
+                        AnimatedContentTransitionScope.SlideDirection.Down,
                         animationSpec = tween(ANIMATION_DURATION)
                     )
                 },
                 exitTransition = {
                     slideOutOfContainer(
-                        AnimatedContentTransitionScope.SlideDirection.Right,
+                        AnimatedContentTransitionScope.SlideDirection.Up,
                         animationSpec = tween(ANIMATION_DURATION)
                     )
                 }

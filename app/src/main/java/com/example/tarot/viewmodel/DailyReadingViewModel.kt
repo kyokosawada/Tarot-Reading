@@ -7,6 +7,7 @@ import com.example.tarot.data.model.DailyReading
 import com.example.tarot.data.model.TarotCard
 import com.example.tarot.data.model.getReversedKeywordsList
 import com.example.tarot.data.model.getUprightKeywordsList
+import com.example.tarot.data.repository.JourneyRepository
 import com.example.tarot.data.repository.SettingsRepository
 import com.example.tarot.data.repository.TarotRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,13 +30,15 @@ data class DailyReadingUiState(
     val errorMessage: String? = null,
     val hasDrawnToday: Boolean = false,
     val isReversed: Boolean = false,
-    val allowReversedCards: Boolean = false // Will be set from settings
+    val allowReversedCards: Boolean = false, // Will be set from settings
+    val streakStatus: JourneyRepository.StreakStatus? = null // Add streak tracking
 )
 
 @HiltViewModel
 class DailyReadingViewModel @Inject constructor(
     private val tarotRepository: TarotRepository,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val journeyRepository: JourneyRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DailyReadingUiState())
@@ -48,6 +51,7 @@ class DailyReadingViewModel @Inject constructor(
             }
         }
         checkDailyReading()
+        loadStreakStatus()
     }
 
     private fun checkDailyReading() {
@@ -74,6 +78,9 @@ class DailyReadingViewModel @Inject constructor(
                     // No reading for today, draw a new card
                     drawDailyCard()
                 }
+
+                // Load streak status after checking/setting the reading
+                loadStreakStatus()
 
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
@@ -142,9 +149,16 @@ class DailyReadingViewModel @Inject constructor(
                     val updatedReading = currentReading.copy(isRevealed = true)
                     tarotRepository.updateDailyReading(updatedReading)
 
+                    // Update streak tracking (only on first reveal)
+                    journeyRepository.onDailyReadingCompleted()
+
+                    // Get updated streak status
+                    val streakStatus = journeyRepository.getStreakStatus()
+
                     _uiState.value = _uiState.value.copy(
                         isCardRevealed = true,
-                        dailyReading = updatedReading
+                        dailyReading = updatedReading,
+                        streakStatus = streakStatus
                     )
                 } else {
                     // Fallback for local state update
@@ -161,6 +175,17 @@ class DailyReadingViewModel @Inject constructor(
     fun resetDailyReading() {
         _uiState.value = DailyReadingUiState(readingDate = getCurrentDate())
         checkDailyReading()
+    }
+
+    private fun loadStreakStatus() {
+        viewModelScope.launch {
+            try {
+                val streakStatus = journeyRepository.getStreakStatus()
+                _uiState.value = _uiState.value.copy(streakStatus = streakStatus)
+            } catch (e: Exception) {
+                Log.e("DailyReadingViewModel", "Failed to load streak status", e)
+            }
+        }
     }
 
     fun clearError() {

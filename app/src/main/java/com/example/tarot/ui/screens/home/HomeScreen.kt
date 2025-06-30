@@ -37,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -66,15 +67,27 @@ import com.example.tarot.ui.theme.TextAccent
 import com.example.tarot.ui.theme.TextPrimary
 import com.example.tarot.ui.theme.TextSecondary
 import com.example.tarot.util.ImageResourceMapper
+import com.example.tarot.viewmodel.AuthViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    authViewModel: AuthViewModel? = null,
     onNavigateToReading: (String) -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    // Simple auth data refresh when HomeScreen loads
+    LaunchedEffect(Unit) {
+        try {
+            authViewModel?.refreshUserData()
+        } catch (e: Exception) {
+            // Log error but don't crash the app
+            android.util.Log.e("HomeScreen", "Error refreshing user data", e)
+        }
+    }
+
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 

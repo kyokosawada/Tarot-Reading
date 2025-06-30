@@ -68,6 +68,8 @@ fun ProfileScreen(
     val authUiState by authViewModel.uiState.collectAsState()
     val user = authUiState.user
 
+    // Removed LaunchedEffect for refreshUserData - now handled in HomeViewModel
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -97,15 +99,16 @@ fun ProfileScreen(
                     .fillMaxSize()
                     .padding(paddingValues)
                     .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(32.dp)
             ) {
                 item {
                     ProfileHeader(user = user)
                 }
 
                 item {
-                    StatsSection()
+                    StatsSection(user = user)
                 }
+
 
                 item {
                     PreferencesSection(
@@ -215,6 +218,7 @@ fun ProfileHeader(
 
 @Composable
 fun StatsSection(
+    user: User,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -229,26 +233,26 @@ fun StatsSection(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 StatItem(
                     label = "Readings",
-                    value = "47",
+                    value = user.totalReadings.toString(),
                     emoji = "📚"
                 )
-                
+
                 StatItem(
-                    label = "Streak",
-                    value = "12 days",
+                    label = "Daily Streak",
+                    value = if (user.currentStreak > 0) "${user.currentStreak} days" else "0 days",
                     emoji = "🔥"
                 )
-                
+
                 StatItem(
                     label = "Level",
-                    value = "Mystic",
+                    value = user.level,
                     emoji = "⭐"
                 )
             }
@@ -310,12 +314,16 @@ fun PreferencesSection(
                 onClick = { }
             )
             
+            Spacer(modifier = Modifier.height(8.dp))
+            
             PreferenceItem(
                 icon = Icons.AutoMirrored.Filled.List,
                 title = "Reading History",
                 subtitle = "View your past readings",
                 onClick = { }
             )
+            
+            Spacer(modifier = Modifier.height(8.dp))
             
             PreferenceItem(
                 icon = Icons.Default.Settings,
@@ -326,6 +334,7 @@ fun PreferencesSection(
         }
     }
 }
+
 
 @Composable
 fun AccountSection(
@@ -353,6 +362,8 @@ fun AccountSection(
                 onClick = { }
             )
             
+            Spacer(modifier = Modifier.height(8.dp))
+            
             PreferenceItem(
                 icon = Icons.Default.Email,
                 title = "Contact Support",
@@ -360,7 +371,7 @@ fun AccountSection(
                 onClick = { }
             )
             
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             
             Button(
                 onClick = onLogoutClick,
@@ -499,7 +510,15 @@ fun ProfileHeaderPreview() {
 @Composable
 fun StatsSectionPreview() {
     TarotTheme {
-        StatsSection()
+        val mockUser = User(
+            id = "preview_id",
+            name = "Preview User",
+            email = "preview@example.com",
+            totalReadings = 23,
+            currentStreak = 7,
+            level = "Seeker"
+        )
+        StatsSection(user = mockUser)
     }
 }
 

@@ -38,13 +38,31 @@ data class User(
     val birthMonth: Int? = null,  // 1-12 for January-December
     val birthYear: Int? = null,
     val isProfileComplete: Boolean = false,
-    val createdAt: Long? = null  // Timestamp when user joined
+    val createdAt: Long? = null,  // Timestamp when user joined
+    // Journey data fields
+    val totalReadings: Int = 0,
+    val currentStreak: Int = 0,
+    val lastReadingDate: String? = null, // Format: "yyyy-MM-dd" for streak calculation
+    val level: String = "Novice"
 )
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val firebaseRepository: FirebaseRepository
 ) : ViewModel() {
+
+    companion object {
+        // Calculate user level based on total readings
+        fun calculateUserLevel(totalReadings: Int): String {
+            return when {
+                totalReadings >= 100 -> "Master"
+                totalReadings >= 50 -> "Mystic"
+                totalReadings >= 20 -> "Seeker"
+                totalReadings >= 5 -> "Apprentice"
+                else -> "Novice"
+            }
+        }
+    }
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
@@ -509,10 +527,76 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    fun updateUserJourney(totalReadings: Int, currentStreak: Int, level: String) {
+        viewModelScope.launch {
+            try {
+                val currentUser = _uiState.value.user
+                if (currentUser != null) {
+                    // Update user with new journey data (bestStreak removed)
+                    val updatedUser = currentUser.copy(
+                        totalReadings = totalReadings,
+                        currentStreak = currentStreak,
+                        level = level
+                    )
+
+                    // Save to Firestore database
+                    val result = firebaseRepository.saveUserProfile(updatedUser)
+                    result.fold(
+                        onSuccess = {
+                            _uiState.value = _uiState.value.copy(user = updatedUser)
+                        },
+                        onFailure = { error ->
+                            _uiState.value = _uiState.value.copy(
+                                errorMessage = "Failed to update journey: ${error.message}"
+                            )
+                        }
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    errorMessage = "Failed to update journey: ${e.message}"
+                )
+            }
+        }
+    }
+
+    fun incrementReading() {
+        viewModelScope.launch {
+            val currentUser = _uiState.value.user
+            if (currentUser != null) {
+                val newReadingCount = currentUser.totalReadings + 1
+                val newLevel = calculateUserLevel(newReadingCount)
+
+                updateUserJourney(
+                    totalReadings = newReadingCount,
+                    currentStreak = currentUser.currentStreak, // Streak will be handled by JourneyRepository
+                    level = newLevel
+                )
+            }
+        }
+    }
+
     fun clearMessages() {
         _uiState.value = _uiState.value.copy(
             errorMessage = null,
             successMessage = null
         )
+    }
+
+    fun refreshUserData() {
+        viewModelScope.launch {
+            val currentUser = firebaseAuth.currentUser
+            if (currentUser != null) {
+                val profileResult = firebaseRepository.getUserProfile(currentUser.uid)
+                profileResult.fold(
+                    onSuccess = { firestoreUser ->
+                        if (firestoreUser != null) {
+                            _uiState.value = _uiState.value.copy(user = firestoreUser)
+                        }
+                    },
+                    onFailure = { /* Keep current state on error */ }
+                )
+            }
+        }
     }
 }

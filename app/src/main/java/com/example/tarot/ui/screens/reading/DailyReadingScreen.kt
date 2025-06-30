@@ -314,7 +314,7 @@ fun CardInterpretation(
             )
 
             Text(
-                text = if (isReversed) card.reversedMeaning else card.dailyMessage,
+                text = if (isReversed) card.reversedDailyMessage else card.uprightDailyMessage,
                 fontSize = 14.sp,
                 color = TextPrimary,
                 lineHeight = 20.sp

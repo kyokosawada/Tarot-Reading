@@ -23,7 +23,8 @@ data class TarotCard(
     val uprightKeywords: String, // Comma-separated keywords
     val reversedKeywords: String, // Comma-separated keywords
     val description: String,
-    val dailyMessage: String, // Generic daily message for readings
+    val uprightDailyMessage: String, // Daily message for upright position
+    val reversedDailyMessage: String, // Daily message for reversed position
     val numerology: Int? // For numbered cards (1-10, 11=Page, 12=Knight, 13=Queen, 14=King)
 )
 

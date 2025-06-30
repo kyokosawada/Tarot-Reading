@@ -31,8 +31,13 @@ class FirebaseRepository {
                 "birthMonth" to user.birthMonth,
                 "birthYear" to user.birthYear,
                 "isProfileComplete" to user.isProfileComplete,
-                "createdAt" to System.currentTimeMillis(),
-                "updatedAt" to System.currentTimeMillis()
+                "createdAt" to (user.createdAt
+                    ?: System.currentTimeMillis()), // Preserve original createdAt
+                "updatedAt" to System.currentTimeMillis(), // Always update this
+                // Journey data fields
+                "totalReadings" to user.totalReadings,
+                "currentStreak" to user.currentStreak,
+                "level" to user.level
             )
             usersCollection.document(user.id).set(userData).await()
             Result.success(Unit)
@@ -55,7 +60,11 @@ class FirebaseRepository {
                     birthMonth = (userData?.get("birthMonth") as? Long)?.toInt(),
                     birthYear = (userData?.get("birthYear") as? Long)?.toInt(),
                     isProfileComplete = userData?.get("isProfileComplete") as? Boolean ?: false,
-                    createdAt = userData?.get("createdAt") as? Long
+                    createdAt = userData?.get("createdAt") as? Long,
+                    // Journey data fields
+                    totalReadings = (userData?.get("totalReadings") as? Long)?.toInt() ?: 0,
+                    currentStreak = (userData?.get("currentStreak") as? Long)?.toInt() ?: 0,
+                    level = userData?.get("level") as? String ?: "Novice"
                 )
                 Result.success(user)
             } else {
@@ -86,7 +95,11 @@ class FirebaseRepository {
                         "uprightMeaning" to card.uprightMeaning,
                         "reversedMeaning" to card.reversedMeaning,
                         "imageName" to card.imageName,
-                        "dailyMessage" to card.dailyMessage
+                        "uprightKeywords" to card.uprightKeywords,
+                        "reversedKeywords" to card.reversedKeywords,
+                        "description" to card.description,
+                        "uprightDailyMessage" to card.uprightDailyMessage,
+                        "reversedDailyMessage" to card.reversedDailyMessage
                     )
                 },
                 "interpretation" to reading.interpretation,
@@ -147,10 +160,14 @@ class FirebaseRepository {
                                     imageName = cardData["imageName"] as? String ?: "",
                                     uprightMeaning = cardData["uprightMeaning"] as? String ?: "",
                                     reversedMeaning = cardData["reversedMeaning"] as? String ?: "",
-                                    uprightKeywords = "",
-                                    reversedKeywords = "",
-                                    description = "",
-                                    dailyMessage = cardData["dailyMessage"] as? String ?: "",
+                                    uprightKeywords = cardData["uprightKeywords"] as? String ?: "",
+                                    reversedKeywords = cardData["reversedKeywords"] as? String
+                                        ?: "",
+                                    description = cardData["description"] as? String ?: "",
+                                    uprightDailyMessage = cardData["uprightDailyMessage"] as? String
+                                        ?: "",
+                                    reversedDailyMessage = cardData["reversedDailyMessage"] as? String
+                                        ?: "",
                                     numerology = null
                                 )
                             } ?: emptyList(),

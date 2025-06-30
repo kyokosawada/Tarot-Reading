@@ -1,6 +1,13 @@
 package com.example.tarot.ui.screens.settings
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -30,6 +37,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -95,14 +103,18 @@ fun TarotSettingsSection(
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp)),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
         ),
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(
-            modifier = Modifier.padding(20.dp)
+            modifier = Modifier
+                .padding(20.dp)
+                .clip(RoundedCornerShape(8.dp))
         ) {
             Text(
                 text = "Tarot Reading Preferences",
@@ -132,8 +144,20 @@ fun SettingItem(
     onToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Animate colors based on the actual enabled state
+    val animatedProgress by animateFloatAsState(
+        targetValue = if (isEnabled) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = 300,
+            delayMillis = 0
+        ),
+        label = "switch_color_animation"
+    )
+
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp)),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -154,23 +178,55 @@ fun SettingItem(
             )
         }
 
-        if (isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(24.dp),
-                strokeWidth = 2.dp,
-                color = MysticGold
-            )
-        } else {
-            Switch(
-                checked = isEnabled,
-                onCheckedChange = { onToggle() },
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = MysticGold,
-                    checkedTrackColor = MysticGold.copy(alpha = 0.5f),
-                    uncheckedThumbColor = MysticSilver,
-                    uncheckedTrackColor = MysticSilver.copy(alpha = 0.5f)
+        AnimatedContent(
+            targetState = isLoading,
+            transitionSpec = {
+                fadeIn(animationSpec = tween(150, 150)) togetherWith
+                        fadeOut(animationSpec = tween(150))
+            },
+            label = "loading_switch_transition"
+        ) { loading ->
+            if (loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    strokeWidth = 2.dp,
+                    color = MysticGold
                 )
-            )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(16.dp))
+                        .padding(4.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Switch(
+                        checked = isEnabled,
+                        onCheckedChange = { onToggle() },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = androidx.compose.ui.graphics.lerp(
+                                MysticSilver,
+                                MysticGold,
+                                animatedProgress
+                            ),
+                            checkedTrackColor = androidx.compose.ui.graphics.lerp(
+                                MysticSilver.copy(alpha = 0.4f),
+                                MysticGold.copy(alpha = 0.6f),
+                                animatedProgress
+                            ),
+                            uncheckedThumbColor = androidx.compose.ui.graphics.lerp(
+                                MysticSilver,
+                                MysticGold,
+                                animatedProgress
+                            ),
+                            uncheckedTrackColor = androidx.compose.ui.graphics.lerp(
+                                MysticSilver.copy(alpha = 0.4f),
+                                MysticGold.copy(alpha = 0.6f),
+                                animatedProgress
+                            )
+                        )
+                    )
+                }
+            }
         }
     }
 }

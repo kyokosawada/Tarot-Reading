@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tarot.data.FirebaseRepository
 import com.example.tarot.data.model.TarotCard
+import com.example.tarot.data.repository.JourneyRepository
 import com.example.tarot.data.repository.TarotRepository
-import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -49,16 +49,29 @@ data class UserStats(
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val firebaseRepository: FirebaseRepository,
-    private val tarotRepository: TarotRepository
+    private val tarotRepository: TarotRepository,
+    private val journeyRepository: JourneyRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
-    private val auth = FirebaseAuth.getInstance()
-
     init {
         loadHomeData()
         observeReadings()
+    }
+
+    // Add method to refresh user stats (called externally after auth refresh)
+    fun refreshUserStats() {
+        viewModelScope.launch {
+            try {
+                // Refresh user stats from journey repository
+                val userStats = loadUserStats()
+                _uiState.value = _uiState.value.copy(userStats = userStats)
+            } catch (e: Exception) {
+                // Log error but don't show to user as it's background refresh
+                android.util.Log.e("HomeViewModel", "Failed to refresh user stats", e)
+            }
+        }
     }
 
     private fun observeReadings() {
@@ -106,20 +119,12 @@ class HomeViewModel @Inject constructor(
                 val saveResult = firebaseRepository.saveTarotReading(newReading)
                 saveResult.fold(
                     onSuccess = {
-                        // Update stats
-                        val updatedStats = _uiState.value.userStats.copy(
-                            totalReadings = _uiState.value.userStats.totalReadings + 1,
-                            experiencePoints = _uiState.value.userStats.experiencePoints + 10
-                        )
-
-                        // Save updated stats
-                        auth.currentUser?.uid?.let { userId ->
-                            firebaseRepository.saveUserStats(userId, updatedStats)
+                        // Increment reading journey metric
+                        viewModelScope.launch {
+                            journeyRepository.incrementReading()
                         }
-
                         _uiState.value = _uiState.value.copy(
                             isLoading = false,
-                            userStats = updatedStats,
                             errorMessage = null
                         )
                     },
@@ -165,9 +170,11 @@ class HomeViewModel @Inject constructor(
     private suspend fun generateDailyInsight(): DailyInsight {
         // Get a random tarot card for daily insight
         val randomCard = tarotRepository.getRandomCard()
+        val isReversed =
+            kotlin.random.Random.nextBoolean() // Randomly determine if card is reversed
 
         return DailyInsight(
-            message = randomCard.dailyMessage,
+            message = if (isReversed) randomCard.reversedDailyMessage else randomCard.uprightDailyMessage,
             date = getCurrentDate(),
             rating = (3..5).random()
         )
@@ -176,12 +183,8 @@ class HomeViewModel @Inject constructor(
 
 
     private suspend fun loadUserStats(): UserStats {
-        val userId = auth.currentUser?.uid
-        return if (userId != null) {
-            firebaseRepository.getUserStats(userId).getOrNull() ?: UserStats()
-        } else {
-            UserStats()
-        }
+        val userStats = journeyRepository.getUserStats()
+        return userStats ?: UserStats()
     }
 
 

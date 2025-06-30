@@ -18,7 +18,8 @@ object TarotCardData {
             uprightKeywords = "new beginnings, innocence, adventure, spontaneity, leap of faith",
             reversedKeywords = "recklessness, foolishness, poor judgment, lack of direction",
             description = "The Fool represents new beginnings and having faith in the future. This card encourages you to take a leap of faith and trust in the journey ahead.",
-            dailyMessage = "Today brings opportunities for new adventures. Trust your instincts and embrace the unknown.",
+            uprightDailyMessage = "Today brings opportunities for new adventures. Trust your instincts and embrace the unknown.",
+            reversedDailyMessage = "Be cautious of impulsive decisions today. Take time to think before you leap.",
             numerology = 0
         ),
         TarotCard(
@@ -32,7 +33,8 @@ object TarotCardData {
             uprightKeywords = "manifestation, willpower, resourcefulness, skill, concentration",
             reversedKeywords = "manipulation, trickery, illusion, unused talents, deception",
             description = "The Magician represents the power to manifest your desires through focused will and action. You have all the tools you need to succeed.",
-            dailyMessage = "Your power to create and manifest is strong today. Focus your energy on your goals.",
+            uprightDailyMessage = "Your power to create and manifest is strong today. Focus your energy on your goals.",
+            reversedDailyMessage = "Avoid manipulative tactics today. Be honest about your intentions and abilities.",
             numerology = 1
         ),
         TarotCard(
@@ -46,7 +48,8 @@ object TarotCardData {
             uprightKeywords = "intuition, mystery, subconscious, spirituality, higher power",
             reversedKeywords = "secrets, hidden motives, disconnection, lack of center",
             description = "The High Priestess represents intuition and inner wisdom. She encourages you to trust your instincts and look within for answers.",
-            dailyMessage = "Listen to your inner voice today. Your intuition holds the key to understanding.",
+            uprightDailyMessage = "Listen to your inner voice today. Your intuition holds the key to understanding.",
+            reversedDailyMessage = "Reconnect with your inner wisdom today. Don't let secrets or confusion cloud your judgment.",
             numerology = 2
         ),
         TarotCard(
@@ -60,7 +63,8 @@ object TarotCardData {
             uprightKeywords = "femininity, beauty, nature, abundance, maternal care",
             reversedKeywords = "creative block, dependence, neglect, smothering, infertility",
             description = "The Empress represents fertility, femininity, and abundance. She nurtures growth and celebrates the beauty of creation.",
-            dailyMessage = "Embrace your creative power today. Nurture what you wish to see grow.",
+            uprightDailyMessage = "Embrace your creative power today. Nurture what you wish to see grow.",
+            reversedDailyMessage = "Avoid smothering others with your care today. Allow space for natural growth.",
             numerology = 3
         ),
         TarotCard(
@@ -74,7 +78,8 @@ object TarotCardData {
             uprightKeywords = "authority, structure, control, fatherhood, leadership",
             reversedKeywords = "tyranny, rigidity, coldness, domination, inflexibility",
             description = "The Emperor represents authority, structure, and paternal guidance. He brings order and stability through strong leadership.",
-            dailyMessage = "Take charge of your situation today. Create structure and set clear boundaries.",
+            uprightDailyMessage = "Take charge of your situation today. Create structure and set clear boundaries.",
+            reversedDailyMessage = "Avoid being overly controlling today. Find balance between authority and flexibility.",
             numerology = 4
         ),
         TarotCard(
@@ -88,7 +93,8 @@ object TarotCardData {
             uprightKeywords = "tradition, conformity, morality, ethics, spiritual guidance",
             reversedKeywords = "personal beliefs, freedom, non-conformity, rebellion, ignorance",
             description = "The Hierophant represents spiritual wisdom and traditional values. He guides you toward established paths of knowledge and belief.",
-            dailyMessage = "Seek wisdom from traditional sources today. Honor the teachings that have stood the test of time.",
+            uprightDailyMessage = "Seek wisdom from traditional sources today. Honor the teachings that have stood the test of time.",
+            reversedDailyMessage = "Question established norms today. Trust your personal beliefs over imposed traditions.",
             numerology = 5
         ),
         TarotCard(
@@ -102,7 +108,8 @@ object TarotCardData {
             uprightKeywords = "love, harmony, relationships, choices, values, unity",
             reversedKeywords = "self-love, disharmony, imbalance, poor choices, disconnection",
             description = "The Lovers represents deep connections and important choices. This card speaks to relationships and the values that guide your decisions.",
-            dailyMessage = "Important choices await you today. Let love and your values guide your decisions.",
+            uprightDailyMessage = "Important choices await you today. Let love and your values guide your decisions.",
+            reversedDailyMessage = "Focus on self-love today. Avoid making important relationship decisions when values are unclear.",
             numerology = 6
         ),
         TarotCard(
@@ -116,7 +123,8 @@ object TarotCardData {
             uprightKeywords = "control, willpower, success, determination, direction",
             reversedKeywords = "self-discipline, opposition, lack of direction, aggression",
             description = "The Chariot represents triumph through maintaining focus and determination. Success comes through balancing opposing forces.",
-            dailyMessage = "Your determination will lead to victory today. Stay focused on your path forward.",
+            uprightDailyMessage = "Your determination will lead to victory today. Stay focused on your path forward.",
+            reversedDailyMessage = "Gather your scattered energy today. Find direction before moving forward.",
             numerology = 7
         ),
         TarotCard(
@@ -130,7 +138,8 @@ object TarotCardData {
             uprightKeywords = "strength, courage, patience, control, compassion",
             reversedKeywords = "self-doubt, lack of confidence, low energy, weakness",
             description = "Strength represents inner fortitude and the power of gentle persuasion. True strength comes from compassion and self-control.",
-            dailyMessage = "Your inner strength will guide you today. Approach challenges with patience and compassion.",
+            uprightDailyMessage = "Your inner strength will guide you today. Approach challenges with patience and compassion.",
+            reversedDailyMessage = "Build your confidence today. Don't let self-doubt undermine your natural strength.",
             numerology = 8
         ),
         TarotCard(
@@ -144,7 +153,8 @@ object TarotCardData {
             uprightKeywords = "soul searching, introspection, guidance, solitude, enlightenment",
             reversedKeywords = "isolation, loneliness, withdrawal, lost your way",
             description = "The Hermit represents the search for inner truth and spiritual enlightenment. Sometimes you must go within to find the answers you seek.",
-            dailyMessage = "Take time for introspection today. The answers you seek lie within your own wisdom.",
+            uprightDailyMessage = "Take time for introspection today. The answers you seek lie within your own wisdom.",
+            reversedDailyMessage = "Avoid excessive isolation today. Seek guidance from trusted others when lost.",
             numerology = 9
         ),
         TarotCard(
@@ -158,7 +168,8 @@ object TarotCardData {
             uprightKeywords = "good luck, karma, life cycles, destiny, turning point",
             reversedKeywords = "bad luck, lack of control, clinging to control, setbacks",
             description = "The Wheel of Fortune represents the cyclical nature of life and the role of destiny. What goes up must come down, and vice versa.",
-            dailyMessage = "Change is in the air today. Trust that the wheel of fortune is turning in your favor.",
+            uprightDailyMessage = "Change is in the air today. Trust that the wheel of fortune is turning in your favor.",
+            reversedDailyMessage = "Accept that some things are beyond your control today. Let go of the need to control every outcome.",
             numerology = 10
         ),
         TarotCard(
@@ -172,7 +183,8 @@ object TarotCardData {
             uprightKeywords = "justice, fairness, truth, cause and effect, law",
             reversedKeywords = "unfairness, lack of accountability, dishonesty, bias",
             description = "Justice represents fairness, truth, and the law of cause and effect. Your actions have consequences, and balance must be restored.",
-            dailyMessage = "Seek truth and fairness in all your dealings today. Justice will prevail.",
+            uprightDailyMessage = "Seek truth and fairness in all your dealings today. Justice will prevail.",
+            reversedDailyMessage = "Examine your own biases today. Are you being fair in your judgments of others?",
             numerology = 11
         ),
         TarotCard(
@@ -186,7 +198,8 @@ object TarotCardData {
             uprightKeywords = "suspension, letting go, sacrifice, patience, new perspective",
             reversedKeywords = "delays, resistance, stalling, indecision, fear of sacrifice",
             description = "The Hanged Man represents willing sacrifice and gaining new perspective through patience. Sometimes you must surrender to move forward.",
-            dailyMessage = "Practice patience today. A new perspective will emerge from your willingness to wait.",
+            uprightDailyMessage = "Practice patience today. A new perspective will emerge from your willingness to wait.",
+            reversedDailyMessage = "Stop resisting necessary changes today. The delay you're experiencing serves a purpose.",
             numerology = 12
         ),
         TarotCard(
@@ -200,7 +213,8 @@ object TarotCardData {
             uprightKeywords = "endings, beginnings, change, transformation, transition",
             reversedKeywords = "resistance to change, fear of change, stagnation, decay",
             description = "Death represents transformation and the end of one phase leading to the beginning of another. Embrace change as a natural part of life.",
-            dailyMessage = "Transformation is occurring today. Release what no longer serves you to make room for new growth.",
+            uprightDailyMessage = "Transformation is occurring today. Release what no longer serves you to make room for new growth.",
+            reversedDailyMessage = "Notice where you might be resisting change today. Transformation can’t happen until you let go of the old.",
             numerology = 13
         ),
         TarotCard(
@@ -214,7 +228,8 @@ object TarotCardData {
             uprightKeywords = "balance, moderation, patience, purpose, harmony",
             reversedKeywords = "imbalance, excess, extremes, discord, recklessness",
             description = "Temperance represents balance, moderation, and the blending of opposites. Find the middle path that leads to harmony and healing.",
-            dailyMessage = "Seek balance in all things today. Moderation and patience will bring you peace.",
+            uprightDailyMessage = "Seek balance in all things today. Moderation and patience will bring you peace.",
+            reversedDailyMessage = "Avoid extremes or impatient actions today. Find harmony by practicing moderation.",
             numerology = 14
         ),
         TarotCard(
@@ -228,7 +243,8 @@ object TarotCardData {
             uprightKeywords = "bondage, addiction, restriction, sexuality, materialism",
             reversedKeywords = "releasing limiting beliefs, freedom, reclaiming power, detachment",
             description = "The Devil represents bondage to material desires and self-imposed limitations. Recognize the chains that bind you are often of your own making.",
-            dailyMessage = "Examine what holds you back today. The power to break free from limitations lies within you.",
+            uprightDailyMessage = "Examine what holds you back today. The power to break free from limitations lies within you.",
+            reversedDailyMessage = "Notice where unhealthy attachments or limiting beliefs may be influencing you today. Freedom is possible through greater self-awareness.",
             numerology = 15
         ),
         TarotCard(
@@ -242,7 +258,8 @@ object TarotCardData {
             uprightKeywords = "sudden change, upheaval, chaos, revelation, awakening",
             reversedKeywords = "personal transformation, fear of change, averting disaster, resistance",
             description = "The Tower represents sudden upheaval that clears away false foundations. Though shocking, this destruction paves the way for truth and liberation.",
-            dailyMessage = "Unexpected changes may occur today. Trust that what falls away was not meant to last.",
+            uprightDailyMessage = "Unexpected changes may occur today. Trust that what falls away was not meant to last.",
+            reversedDailyMessage = "Personal transformation may feel disruptive today. Don't resist the changes needed for your growth.",
             numerology = 16
         ),
         TarotCard(
@@ -256,7 +273,8 @@ object TarotCardData {
             uprightKeywords = "hope, faith, purpose, renewal, spirituality, healing",
             reversedKeywords = "lack of faith, despair, self-trust, discouragement, disconnection",
             description = "The Star represents hope, healing, and spiritual guidance. After the storm comes the calm, and your faith will be renewed.",
-            dailyMessage = "Hope shines brightly today. Trust in the divine guidance that lights your path forward.",
+            uprightDailyMessage = "Hope shines brightly today. Trust in the divine guidance that lights your path forward.",
+            reversedDailyMessage = "If you feel disconnected or discouraged today, remember that renewal and faith are still possible. Look for the light ahead.",
             numerology = 17
         ),
         TarotCard(
@@ -270,7 +288,8 @@ object TarotCardData {
             uprightKeywords = "illusion, fear, anxiety, subconscious, intuition",
             reversedKeywords = "release of fear, inner confusion, self-deception, blocked intuition",
             description = "The Moon represents illusion, intuition, and the mysterious realm of the subconscious. Not everything is as it appears - trust your inner guidance.",
-            dailyMessage = "Pay attention to your dreams and intuition today. The truth may be hidden beneath surface appearances.",
+            uprightDailyMessage = "Pay attention to your dreams and intuition today. The truth may be hidden beneath surface appearances.",
+            reversedDailyMessage = "Release your fears and notice where confusion or self-deception may be clouding your judgment today.",
             numerology = 18
         ),
         TarotCard(
@@ -284,7 +303,8 @@ object TarotCardData {
             uprightKeywords = "positivity, fun, warmth, success, vitality, joy",
             reversedKeywords = "inner child, feeling down, overly optimistic, lack of success",
             description = "The Sun represents joy, success, and positive energy. This is a time of celebration, vitality, and clear vision of your path ahead.",
-            dailyMessage = "Joy and success illuminate your path today. Embrace the positive energy surrounding you.",
+            uprightDailyMessage = "Joy and success illuminate your path today. Embrace the positive energy surrounding you.",
+            reversedDailyMessage = "Pay attention to your inner child today and don't let feelings of doubt or unrealistic expectations cloud your joy.",
             numerology = 19
         ),
         TarotCard(
@@ -298,7 +318,8 @@ object TarotCardData {
             uprightKeywords = "judgement, rebirth, inner calling, forgiveness, awakening",
             reversedKeywords = "self-doubt, inner critic, ignoring the call, lack of self-awareness",
             description = "Judgement represents spiritual awakening and answering your higher calling. It's time for rebirth and stepping into your true purpose.",
-            dailyMessage = "Listen to your inner calling today. A spiritual awakening or important realization awaits you.",
+            uprightDailyMessage = "Listen to your inner calling today. A spiritual awakening or important realization awaits you.",
+            reversedDailyMessage = "Notice where your inner critic or self-doubt may be holding you back today. Embrace self-forgiveness and be open to new awareness.",
             numerology = 20
         ),
         TarotCard(
@@ -312,7 +333,8 @@ object TarotCardData {
             uprightKeywords = "completion, integration, accomplishment, travel, fulfillment",
             reversedKeywords = "seeking closure, lack of achievement, unfulfilled goals, stagnation",
             description = "The World represents completion, accomplishment, and the fulfillment of your journey. You have achieved integration and wholeness.",
-            dailyMessage = "Completion and fulfillment are within reach today. Celebrate your achievements and the journey that brought you here.",
+            uprightDailyMessage = "Completion and fulfillment are within reach today. Celebrate your achievements and the journey that brought you here.",
+            reversedDailyMessage = "If you feel something is unresolved, focus on finding closure before moving on. True achievement happens when all parts are integrated.",
             numerology = 21
         )
     )
@@ -329,7 +351,8 @@ object TarotCardData {
             uprightKeywords = "new opportunity, prosperity, abundance, manifestation, material success",
             reversedKeywords = "lost opportunity, lack of planning, poor decisions, scarcity mindset",
             description = "The Ace of Pentacles represents new opportunities for material success and abundance. It's the seed of prosperity and practical achievement.",
-            dailyMessage = "New opportunities for material success present themselves today. Plant the seeds for future prosperity.",
+            uprightDailyMessage = "New opportunities for material success present themselves today. Plant the seeds for future prosperity.",
+            reversedDailyMessage = "Be aware of missed opportunities or scarcity thinking today. Careful planning is needed to make the most of your resources.",
             numerology = 1
         ),
         TarotCard(
@@ -343,7 +366,8 @@ object TarotCardData {
             uprightKeywords = "balance, adaptability, time management, flexibility, juggling priorities",
             reversedKeywords = "overwhelmed, disorganization, imbalance, poor time management",
             description = "The Two of Pentacles represents the need to balance multiple priorities and adapt to changing circumstances. Flexibility is key.",
-            dailyMessage = "Balance is essential today. Prioritize wisely and stay adaptable to changing demands.",
+            uprightDailyMessage = "Balance is essential today. Prioritize wisely and stay adaptable to changing demands.",
+            reversedDailyMessage = "If you feel overwhelmed or disorganized, pause and reprioritize before taking on more.",
             numerology = 2
         ),
         TarotCard(
@@ -357,7 +381,8 @@ object TarotCardData {
             uprightKeywords = "teamwork, collaboration, learning, construction, implementation",
             reversedKeywords = "lack of teamwork, disharmony, competition, poor collaboration",
             description = "The Three of Pentacles represents collaboration and the successful completion of projects through teamwork and shared expertise.",
-            dailyMessage = "Teamwork and collaboration lead to success today. Share your skills and learn from others.",
+            uprightDailyMessage = "Teamwork and collaboration lead to success today. Share your skills and learn from others.",
+            reversedDailyMessage = "Miscommunications or lack of collaboration may cause delays today. Reach out and clarify roles to get back on track.",
             numerology = 3
         ),
         TarotCard(
@@ -371,7 +396,8 @@ object TarotCardData {
             uprightKeywords = "security, saving, control, conservatism, material stability",
             reversedKeywords = "greed, overspending, insecurity, letting go, generosity",
             description = "The Four of Pentacles represents financial security and conservation, but warns against being too controlling or greedy with resources.",
-            dailyMessage = "Financial security is important, but don't let fear prevent you from enjoying life's abundance.",
+            uprightDailyMessage = "Financial security is important, but remember to enjoy life's abundance as well.",
+            reversedDailyMessage = "Let go of undue fear or greed today. Generosity and openness lead to a healthier relationship with resources.",
             numerology = 4
         ),
         TarotCard(
@@ -385,7 +411,8 @@ object TarotCardData {
             uprightKeywords = "financial hardship, poverty, isolation, worry, material loss",
             reversedKeywords = "recovery, overcoming hardship, inner resources, spiritual wealth",
             description = "The Five of Pentacles represents financial hardship and material worry, but reminds you that help is available and recovery is possible.",
-            dailyMessage = "Though challenges may arise today, remember that help is available and hardship is temporary.",
+            uprightDailyMessage = "Though challenges may arise today, remember that help is available and hardship is temporary.",
+            reversedDailyMessage = "You may be recovering from hardship—seek spiritual or external support, and remember that brighter days are ahead.",
             numerology = 5
         ),
         TarotCard(
@@ -399,7 +426,8 @@ object TarotCardData {
             uprightKeywords = "generosity, charity, sharing, giving and receiving, community support",
             reversedKeywords = "selfishness, unpaid debts, one-sided giving, power imbalance",
             description = "The Six of Pentacles represents the flow of giving and receiving. It emphasizes generosity and the importance of sharing resources.",
-            dailyMessage = "Practice generosity today. What you give will return to you in unexpected ways.",
+            uprightDailyMessage = "Practice generosity today. What you give will return to you in unexpected ways.",
+            reversedDailyMessage = "Pay attention to power dynamics and inequality in your exchanges today. Make sure generosity is balanced and not one-sided.",
             numerology = 6
         ),
         TarotCard(
@@ -413,7 +441,8 @@ object TarotCardData {
             uprightKeywords = "long-term investment, perseverance, patience, sustainable results, hard work",
             reversedKeywords = "impatience, lack of reward, poor investment, giving up too soon",
             description = "The Seven of Pentacles represents patience and the long-term view. Your hard work and investments will pay off with time.",
-            dailyMessage = "Be patient with your investments today. Long-term thinking brings sustainable rewards.",
+            uprightDailyMessage = "Be patient with your investments today. Long-term thinking brings sustainable rewards.",
+            reversedDailyMessage = "Impatience or lack of results may frustrate you today. Avoid giving up prematurely—reassess your long-term goals before making decisions.",
             numerology = 7
         ),
         TarotCard(
@@ -427,7 +456,8 @@ object TarotCardData {
             uprightKeywords = "skill development, mastery, hard work, apprenticeship, dedication",
             reversedKeywords = "lack of focus, perfectionism, misdirected effort, shortcuts",
             description = "The Eight of Pentacles represents dedication to mastery and skill development. Success comes through focused effort and practice.",
-            dailyMessage = "Focus on mastering your craft today. Dedicated practice leads to expertise and success.",
+            uprightDailyMessage = "Focus on mastering your craft today. Dedicated practice leads to expertise and success.",
+            reversedDailyMessage = "Avoid perfectionism or taking shortcuts today. Redirect your focus to what truly matters for your skill development.",
             numerology = 8
         ),
         TarotCard(
@@ -441,7 +471,8 @@ object TarotCardData {
             uprightKeywords = "financial independence, luxury, self-reliance, abundance, discipline",
             reversedKeywords = "over-investment in work, setbacks, self-worth issues, hustling",
             description = "The Nine of Pentacles represents financial independence and the luxury that comes from disciplined effort and self-reliance.",
-            dailyMessage = "Enjoy the fruits of your labor today. Your discipline and hard work have created abundance.",
+            uprightDailyMessage = "Enjoy the fruits of your labor today. Your discipline and hard work have created abundance.",
+            reversedDailyMessage = "Reassess your work-life balance today. Make sure your self-worth isn't solely tied to your achievements or wealth.",
             numerology = 9
         ),
         TarotCard(
@@ -455,7 +486,8 @@ object TarotCardData {
             uprightKeywords = "wealth, legacy, family security, long-term success, contribution",
             reversedKeywords = "financial failure, instability, family conflict, loss of wealth",
             description = "The Ten of Pentacles represents ultimate material success and the wealth that supports family and community for generations.",
-            dailyMessage = "Focus on building lasting wealth today. Consider the legacy you're creating for future generations.",
+            uprightDailyMessage = "Focus on building lasting wealth today. Consider the legacy you're creating for future generations.",
+            reversedDailyMessage = "Address family financial conflicts or instability today. Remember that true wealth includes relationships, not just money.",
             numerology = 10
         ),
         TarotCard(
@@ -469,7 +501,8 @@ object TarotCardData {
             uprightKeywords = "learning, new opportunities, manifestation, skill development, study",
             reversedKeywords = "procrastination, lack of progress, no commitment, learning difficulties",
             description = "The Page of Pentacles represents a student of the material world, eager to learn and manifest new opportunities through study and practice.",
-            dailyMessage = "Embrace learning opportunities today. New knowledge opens doors to material success.",
+            uprightDailyMessage = "Embrace learning opportunities today. New knowledge opens doors to material success.",
+            reversedDailyMessage = "Overcome procrastination and commit to your goals today. Set clear learning objectives to make progress.",
             numerology = 11
         ),
         TarotCard(
@@ -483,7 +516,8 @@ object TarotCardData {
             uprightKeywords = "hard work, reliability, routine, patience, productivity, service",
             reversedKeywords = "laziness, boredom, feeling stuck, irresponsibility, aimlessness",
             description = "The Knight of Pentacles represents steady progress through hard work and reliability. He values routine and methodical advancement.",
-            dailyMessage = "Steady progress through consistent effort brings success today. Stay committed to your routine.",
+            uprightDailyMessage = "Steady progress through consistent effort brings success today. Stay committed to your routine.",
+            reversedDailyMessage = "Break free from feelings of stagnation today. Add variety to your routine or find new motivation for your work.",
             numerology = 12
         ),
         TarotCard(
@@ -497,7 +531,8 @@ object TarotCardData {
             uprightKeywords = "nurturing, practical, resourceful, financial provider, supporting others",
             reversedKeywords = "work-life imbalance, self-care needs, financial independence, smothering",
             description = "The Queen of Pentacles represents practical nurturing and the ability to provide both emotional and material support to others.",
-            dailyMessage = "Balance nurturing others with self-care today. Your practical wisdom provides security for those you love.",
+            uprightDailyMessage = "Balance nurturing others with self-care today. Your practical wisdom provides security for those you love.",
+            reversedDailyMessage = "Focus on your own needs today. Ensure you're not neglecting self-care while caring for others.",
             numerology = 13
         ),
         TarotCard(
@@ -511,7 +546,8 @@ object TarotCardData {
             uprightKeywords = "financial success, leadership, abundance, generosity, security, mentor",
             reversedKeywords = "obsessed with wealth, stubborn, possessive, financial ineptitude",
             description = "The King of Pentacles represents mastery of the material world through discipline, leadership, and generous sharing of abundance.",
-            dailyMessage = "Lead by example in material matters today. Your success enables you to mentor and support others.",
+            uprightDailyMessage = "Lead by example in material matters today. Your success enables you to mentor and support others.",
+            reversedDailyMessage = "Examine your relationship with money and status today. Avoid being overly possessive or stubborn about material things.",
             numerology = 14
         )
     )
@@ -528,7 +564,8 @@ object TarotCardData {
             uprightKeywords = "breakthrough, new ideas, mental clarity, insight, truth",
             reversedKeywords = "confusion, lack of clarity, poor judgment, clouded thinking",
             description = "The Ace of Swords represents mental breakthrough and the power of clear thinking. It's the spark of new ideas and intellectual clarity.",
-            dailyMessage = "Mental clarity and breakthrough insights come to you today. Trust your intellectual power.",
+            uprightDailyMessage = "Mental clarity and breakthrough insights come to you today. Trust your intellectual power.",
+            reversedDailyMessage = "Confusion or clouded judgment may affect you today. Take time to clear your mind before making decisions.",
             numerology = 1
         ),
         TarotCard(
@@ -542,7 +579,8 @@ object TarotCardData {
             uprightKeywords = "difficult decisions, weighing options, stalemate, avoidance, choices",
             reversedKeywords = "indecision, confusion, information overload, second-guessing",
             description = "The Two of Swords represents being at a crossroads and needing to make difficult decisions. Sometimes you must choose despite incomplete information.",
-            dailyMessage = "Important decisions await today. Trust your inner wisdom when facts alone aren't enough.",
+            uprightDailyMessage = "Important decisions await today. Trust your inner wisdom when facts alone aren't enough.",
+            reversedDailyMessage = "Indecision or confusion may paralyze you today. Gather more information or trust your gut feeling to move forward.",
             numerology = 2
         ),
         TarotCard(
@@ -556,7 +594,8 @@ object TarotCardData {
             uprightKeywords = "heartbreak, sorrow, grief, emotional pain, betrayal",
             reversedKeywords = "healing, recovery, forgiveness, releasing pain, optimism",
             description = "The Three of Swords represents heartbreak and emotional pain, but also the beginning of healing. Allow yourself to grieve so you can heal.",
-            dailyMessage = "Though pain may arise today, remember that healing begins when you acknowledge your hurt.",
+            uprightDailyMessage = "Though pain may arise today, remember that healing begins when you acknowledge your hurt.",
+            reversedDailyMessage = "You're releasing old pain and finding healing today. Forgiveness and optimism guide your recovery.",
             numerology = 3
         ),
         TarotCard(
@@ -570,7 +609,8 @@ object TarotCardData {
             uprightKeywords = "rest, meditation, peace, recuperation, contemplation",
             reversedKeywords = "restlessness, burnout, awakening, re-entering world, stagnation",
             description = "The Four of Swords represents the need for rest and mental recuperation. Take time to recharge your mind and spirit.",
-            dailyMessage = "Rest and meditation restore your mental clarity today. Take time to recharge your spirit.",
+            uprightDailyMessage = "Rest and meditation restore your mental clarity today. Take time to recharge your spirit.",
+            reversedDailyMessage = "Restlessness or burnout may be affecting you today. It's time to re-enter the world and take action.",
             numerology = 4
         ),
         TarotCard(
@@ -584,7 +624,8 @@ object TarotCardData {
             uprightKeywords = "conflict, competition, defeat, betrayal, winning at all costs",
             reversedKeywords = "reconciliation, making amends, conflict resolution, moving on",
             description = "The Five of Swords represents conflict and the hollow victory that comes from winning at others' expense. Choose your battles wisely.",
-            dailyMessage = "Not every battle is worth fighting today. Sometimes walking away is the greater victory.",
+            uprightDailyMessage = "Not every battle is worth fighting today. Sometimes walking away is the greater victory.",
+            reversedDailyMessage = "Reconciliation and making amends are possible today. Let go of past resentments and work toward resolution.",
             numerology = 5
         ),
         TarotCard(
@@ -598,7 +639,8 @@ object TarotCardData {
             uprightKeywords = "transition, moving forward, travel, rite of passage, change",
             reversedKeywords = "resistance to change, unfinished business, incomplete transition",
             description = "The Six of Swords represents transition and moving toward calmer waters. You're leaving difficulties behind and moving to a better place.",
-            dailyMessage = "You're moving from turbulent times to calmer waters today. Trust the transition process.",
+            uprightDailyMessage = "You're moving from turbulent times to calmer waters today. Trust the transition process.",
+            reversedDailyMessage = "Resistance to change or unfinished business may hold you back today. Complete what needs healing before moving forward.",
             numerology = 6
         ),
         TarotCard(
@@ -612,7 +654,8 @@ object TarotCardData {
             uprightKeywords = "betrayal, deception, strategy, sneakiness, getting away with something",
             reversedKeywords = "imposter syndrome, self-deception, coming clean, getting caught",
             description = "The Seven of Swords represents deception and strategic thinking. Be aware of dishonesty around you, including self-deception.",
-            dailyMessage = "Be alert to deception today, both from others and within yourself. Truth serves you better than clever schemes.",
+            uprightDailyMessage = "Be alert to deception today, both from others and within yourself. Truth serves you better than clever schemes.",
+            reversedDailyMessage = "Imposter syndrome or self-deception may surface today. It's time to come clean and be honest with yourself.",
             numerology = 7
         ),
         TarotCard(
@@ -626,7 +669,8 @@ object TarotCardData {
             uprightKeywords = "restriction, trapped, negative thinking, victimization, paralysis",
             reversedKeywords = "self-limiting beliefs, inner critic, releasing negativity, new perspectives",
             description = "The Eight of Swords represents feeling trapped by your own thoughts and limiting beliefs. The prison is often of your own making.",
-            dailyMessage = "The chains that bind you today may be largely mental. Look for ways to free yourself from limiting thoughts.",
+            uprightDailyMessage = "The chains that bind you today may be largely mental. Look for ways to free yourself from limiting thoughts.",
+            reversedDailyMessage = "You're breaking free from self-limiting beliefs today. Release negative thoughts and open yourself to new perspectives.",
             numerology = 8
         ),
         TarotCard(
@@ -640,7 +684,8 @@ object TarotCardData {
             uprightKeywords = "anxiety, worry, fear, nightmares, mental anguish",
             reversedKeywords = "inner turmoil, releasing worry, overcoming fear, hope returning",
             description = "The Nine of Swords represents anxiety and mental anguish. Remember that most fears exist only in the mind and dawn always comes.",
-            dailyMessage = "Anxiety may cloud your thoughts today, but remember that worries are often worse than reality.",
+            uprightDailyMessage = "Anxiety may cloud your thoughts today, but remember that worries are often worse than reality.",
+            reversedDailyMessage = "Inner turmoil is giving way to hope today. You're releasing worry and finding light at the end of the tunnel.",
             numerology = 9
         ),
         TarotCard(
@@ -654,7 +699,8 @@ object TarotCardData {
             uprightKeywords = "painful endings, betrayal, rock bottom, crisis, loss",
             reversedKeywords = "recovery, regeneration, new beginning, learning from past",
             description = "The Ten of Swords represents rock bottom and painful endings, but also the promise that things can only get better from here.",
-            dailyMessage = "If you're experiencing difficulty today, remember that this too shall pass. A new dawn is coming.",
+            uprightDailyMessage = "If you're experiencing difficulty today, remember that this too shall pass. A new dawn is coming.",
+            reversedDailyMessage = "Recovery and regeneration are beginning today. You're learning from the past and ready for a new beginning.",
             numerology = 10
         ),
         TarotCard(
@@ -668,7 +714,8 @@ object TarotCardData {
             uprightKeywords = "new ideas, curiosity, communication, vigilance, learning",
             reversedKeywords = "all talk no action, haste, scattered energy, poor planning",
             description = "The Page of Swords represents intellectual curiosity and the eagerness to learn and communicate new ideas.",
-            dailyMessage = "Your curiosity and desire to learn serve you well today. Communicate your ideas clearly.",
+            uprightDailyMessage = "Your curiosity and desire to learn serve you well today. Communicate your ideas clearly.",
+            reversedDailyMessage = "Avoid being all talk and no action today. Focus your scattered energy and follow through on your plans.",
             numerology = 11
         ),
         TarotCard(
@@ -682,7 +729,8 @@ object TarotCardData {
             uprightKeywords = "ambitious, action-oriented, fast-thinking, driven, impatient",
             reversedKeywords = "restless, unfocused, impulsive, reckless, burn-out",
             description = "The Knight of Swords represents swift action and ambitious drive, but warns against reckless haste and impatience.",
-            dailyMessage = "Your drive and ambition are strong today, but remember to think before you act.",
+            uprightDailyMessage = "Your drive and ambition are strong today, but remember to think before you act.",
+            reversedDailyMessage = "Restlessness and impulsive behavior may lead to burnout today. Slow down and focus your energy wisely.",
             numerology = 12
         ),
         TarotCard(
@@ -696,7 +744,8 @@ object TarotCardData {
             uprightKeywords = "independent, clear thinking, direct communication, perceptive, unbiased",
             reversedKeywords = "overly emotional, harsh, lack of empathy, cold, cruel",
             description = "The Queen of Swords represents clear thinking and direct communication. She cuts through illusion with wisdom and discernment.",
-            dailyMessage = "Think clearly and communicate directly today. Your perceptive nature reveals truth beneath surface appearances.",
+            uprightDailyMessage = "Think clearly and communicate directly today. Your perceptive nature reveals truth beneath surface appearances.",
+            reversedDailyMessage = "Avoid being overly emotional or harsh in your judgments today. Balance clarity with compassion.",
             numerology = 13
         ),
         TarotCard(
@@ -710,7 +759,8 @@ object TarotCardData {
             uprightKeywords = "mental clarity, authority, truth, intellectual power, discipline",
             reversedKeywords = "misuse of power, manipulation, tyrannical, inner truth",
             description = "The King of Swords represents mastery of the mind and the responsible use of intellectual power and authority.",
-            dailyMessage = "Use your intellectual gifts responsibly today. Clear thinking and fair judgment guide your decisions.",
+            uprightDailyMessage = "Use your intellectual gifts responsibly today. Clear thinking and fair judgment guide your decisions.",
+            reversedDailyMessage = "Be mindful of how you use your power today. Avoid manipulation or tyrannical behavior in favor of inner truth.",
             numerology = 14
         )
     )
@@ -727,7 +777,8 @@ object TarotCardData {
             uprightKeywords = "new love, emotional beginning, compassion, creativity, intuition",
             reversedKeywords = "self-love, repressed emotions, blocked creativity, emotional withdrawal",
             description = "The Ace of Cups represents new emotional beginnings and the pure potential of love and creativity. It's the start of emotional fulfillment.",
-            dailyMessage = "Open your heart to new emotional experiences today. Love and creativity flow freely.",
+            uprightDailyMessage = "Open your heart to new emotional experiences today. Love and creativity flow freely.",
+            reversedDailyMessage = "Focus on self-love and addressing repressed emotions today. Clear emotional blocks to restore your creative flow.",
             numerology = 1
         ),
         TarotCard(
@@ -741,7 +792,8 @@ object TarotCardData {
             uprightKeywords = "partnership, love, harmony, connection, mutual respect",
             reversedKeywords = "break-up, disharmony, distrust, self-love, imbalance",
             description = "The Two of Cups represents partnership and mutual attraction. It signifies harmonious relationships and emotional connections.",
-            dailyMessage = "Seek harmony in your relationships today. Connection and mutual understanding flourish.",
+            uprightDailyMessage = "Seek harmony in your relationships today. Connection and mutual understanding flourish.",
+            reversedDailyMessage = "Address relationship imbalances or focus on self-love today. Restore trust and harmony within yourself first.",
             numerology = 2
         ),
         TarotCard(
@@ -755,7 +807,8 @@ object TarotCardData {
             uprightKeywords = "celebration, friendship, community, collaboration, joy",
             reversedKeywords = "independence, isolation, overindulgence, gossip, creative blocks",
             description = "The Three of Cups represents celebration, friendship, and community. It's a time for joy and shared experiences with others.",
-            dailyMessage = "Celebrate connections with friends today. Community and collaboration bring joy.",
+            uprightDailyMessage = "Celebrate connections with friends today. Community and collaboration bring joy.",
+            reversedDailyMessage = "Take time for independence and solitude today. Avoid overindulgence or gossip that might harm friendships.",
             numerology = 3
         ),
         TarotCard(
@@ -769,7 +822,8 @@ object TarotCardData {
             uprightKeywords = "apathy, contemplation, disconnection, boredom, missed opportunities",
             reversedKeywords = "motivation, clarity, acceptance, new opportunities, emotional stability",
             description = "The Four of Cups represents contemplation and emotional withdrawal. Sometimes you need to step back to gain perspective.",
-            dailyMessage = "Take time for reflection today. New opportunities may be waiting for your attention.",
+            uprightDailyMessage = "Take time for reflection today. New opportunities may be waiting for your attention.",
+            reversedDailyMessage = "Motivation and clarity return today. Embrace new perspectives and opportunities that present themselves.",
             numerology = 4
         ),
         TarotCard(
@@ -783,7 +837,8 @@ object TarotCardData {
             uprightKeywords = "loss, regret, disappointment, grief, focusing on negatives",
             reversedKeywords = "recovery, forgiveness, moving on, acceptance, learning from loss",
             description = "The Five of Cups represents loss and disappointment, but also the potential for recovery. Focus on what remains, not what is lost.",
-            dailyMessage = "Though disappointment may come today, remember that hope and healing are always possible.",
+            uprightDailyMessage = "Though disappointment may come today, remember that hope and healing are always possible.",
+            reversedDailyMessage = "Practice self-forgiveness and focus on recovery today. You're learning from loss and ready to move forward.",
             numerology = 5
         ),
         TarotCard(
@@ -797,7 +852,8 @@ object TarotCardData {
             uprightKeywords = "nostalgia, childhood, innocence, reunion, happy memories",
             reversedKeywords = "living in past, childhood issues, lack of playfulness, moving forward",
             description = "The Six of Cups represents nostalgia and innocent joy. It connects you to your inner child and happy memories.",
-            dailyMessage = "Reconnect with your inner child today. Simple pleasures bring the greatest joy.",
+            uprightDailyMessage = "Reconnect with your inner child today. Simple pleasures bring the greatest joy.",
+            reversedDailyMessage = "Avoid living in the past today. Address childhood issues and embrace playfulness to move forward.",
             numerology = 6
         ),
         TarotCard(
@@ -811,7 +867,8 @@ object TarotCardData {
             uprightKeywords = "illusion, choices, fantasy, opportunities, wishful thinking",
             reversedKeywords = "clarity, personal values, realistic goals, limited options, focus",
             description = "The Seven of Cups represents illusion and too many choices. Focus on what truly matters and avoid getting lost in fantasy.",
-            dailyMessage = "Many options present themselves today. Choose wisely and stay grounded in reality.",
+            uprightDailyMessage = "Many options present themselves today. Choose wisely and stay grounded in reality.",
+            reversedDailyMessage = "Clarity and focus return today. Align your choices with your personal values and realistic goals.",
             numerology = 7
         ),
         TarotCard(
@@ -825,7 +882,8 @@ object TarotCardData {
             uprightKeywords = "abandonment, withdrawal, seeking higher purpose, disappointment, moving on",
             reversedKeywords = "fear of change, indecision, trying again, accepting less, stagnation",
             description = "The Eight of Cups represents the courage to walk away from situations that no longer serve you in search of something more meaningful.",
-            dailyMessage = "Sometimes walking away is the bravest choice. Trust your inner guidance about what truly serves you.",
+            uprightDailyMessage = "Sometimes walking away is the bravest choice. Trust your inner guidance about what truly serves you.",
+            reversedDailyMessage = "Consider giving something one more try today, but avoid accepting less than you deserve due to fear of change.",
             numerology = 8
         ),
         TarotCard(
@@ -839,7 +897,8 @@ object TarotCardData {
             uprightKeywords = "wish fulfillment, satisfaction, gratitude, contentment, emotional stability",
             reversedKeywords = "dissatisfaction, materialism, smugness, inner happiness, overindulgence",
             description = "The Nine of Cups represents emotional fulfillment and wish fulfillment. This is the 'wish card' that brings satisfaction and joy.",
-            dailyMessage = "Your wishes may come true today. Practice gratitude for the abundance in your life.",
+            uprightDailyMessage = "Your wishes may come true today. Practice gratitude for the abundance in your life.",
+            reversedDailyMessage = "Look for inner happiness beyond material satisfaction today. Avoid smugness or overindulgence.",
             numerology = 9
         ),
         TarotCard(
@@ -853,7 +912,8 @@ object TarotCardData {
             uprightKeywords = "emotional fulfillment, family harmony, love, happiness, divine connection",
             reversedKeywords = "family conflict, disconnection, misaligned values, broken relationships",
             description = "The Ten of Cups represents ultimate emotional fulfillment and harmonious relationships. It's the happy ending of the emotional journey.",
-            dailyMessage = "Emotional harmony and family happiness surround you today. Cherish these blessed connections.",
+            uprightDailyMessage = "Emotional harmony and family happiness surround you today. Cherish these blessed connections.",
+            reversedDailyMessage = "Address family conflicts or relationship disconnection today. Work on aligning values to restore harmony.",
             numerology = 10
         ),
         TarotCard(
@@ -867,7 +927,8 @@ object TarotCardData {
             uprightKeywords = "creative opportunities, intuitive messages, curiosity, emotional growth",
             reversedKeywords = "creative blocks, emotional immaturity, doubting intuition, moodiness",
             description = "The Page of Cups represents new creative and emotional opportunities. Trust your intuition and remain open to inspiration.",
-            dailyMessage = "Creative inspiration and intuitive messages come to you today. Stay open to new possibilities.",
+            uprightDailyMessage = "Creative inspiration and intuitive messages come to you today. Stay open to new possibilities.",
+            reversedDailyMessage = "Work through creative blocks and trust your intuition today. Avoid emotional immaturity or moodiness.",
             numerology = 11
         ),
         TarotCard(
@@ -881,7 +942,8 @@ object TarotCardData {
             uprightKeywords = "romance, charm, following heart, idealism, emotional pursuit",
             reversedKeywords = "moodiness, jealousy, unrealistic expectations, emotional manipulation",
             description = "The Knight of Cups represents romantic pursuit and following your heart. This card embodies the idealistic lover and creative dreamer.",
-            dailyMessage = "Follow your heart's desires today. Romance and creative inspiration guide your actions.",
+            uprightDailyMessage = "Follow your heart's desires today. Romance and creative inspiration guide your actions.",
+            reversedDailyMessage = "Guard against jealousy or unrealistic expectations today. Balance emotion with realistic thinking.",
             numerology = 12
         ),
         TarotCard(
@@ -895,7 +957,8 @@ object TarotCardData {
             uprightKeywords = "compassion, intuition, emotional stability, empathy, nurturing",
             reversedKeywords = "self-care, co-dependency, emotional instability, giving too much",
             description = "The Queen of Cups represents emotional maturity and intuitive wisdom. She embodies compassion and emotional intelligence.",
-            dailyMessage = "Trust your emotional intelligence today. Your compassion and intuition guide others toward healing.",
+            uprightDailyMessage = "Trust your emotional intelligence today. Your compassion and intuition guide others toward healing.",
+            reversedDailyMessage = "Focus on self-care and avoid co-dependent behaviors today. Balance giving to others with caring for yourself.",
             numerology = 13
         ),
         TarotCard(
@@ -909,7 +972,8 @@ object TarotCardData {
             uprightKeywords = "emotional balance, compassion, diplomacy, wisdom, emotional mastery",
             reversedKeywords = "emotional manipulation, moodiness, lack of compassion, volatility",
             description = "The King of Cups represents emotional mastery and compassionate leadership. He balances heart and mind with wisdom and maturity.",
-            dailyMessage = "Lead with both heart and wisdom today. Your emotional balance inspires and guides others.",
+            uprightDailyMessage = "Lead with both heart and wisdom today. Your emotional balance inspires and guides others.",
+            reversedDailyMessage = "Practice self-compassion and avoid emotional manipulation today. Work on stabilizing your emotional responses.",
             numerology = 14
         )
     )
@@ -933,7 +997,8 @@ object TarotCardData {
             uprightKeywords = "inspiration, creative spark, new energy, potential, growth",
             reversedKeywords = "lack of energy, creative blocks, delays, frustration, boredom",
             description = "The Ace of Wands represents pure creative energy and inspiration. It's the spark of new projects and passionate beginnings.",
-            dailyMessage = "Creative inspiration strikes today. Seize new opportunities with passion and enthusiasm.",
+            uprightDailyMessage = "Creative inspiration strikes today. Seize new opportunities with passion and enthusiasm.",
+            reversedDailyMessage = "Creative blocks or lack of energy may frustrate you today. Take time to rest and reignite your passion.",
             numerology = 1
         ),
         TarotCard(
@@ -947,7 +1012,8 @@ object TarotCardData {
             uprightKeywords = "future planning, personal power, discovery, leaving comfort zone, decisions",
             reversedKeywords = "personal goals, fear of unknown, lack of planning, inner alignment",
             description = "The Two of Wands represents planning for the future and making important decisions about your path forward.",
-            dailyMessage = "Plan boldly for your future today. Step outside your comfort zone to discover new possibilities.",
+            uprightDailyMessage = "Plan boldly for your future today. Step outside your comfort zone to discover new possibilities.",
+            reversedDailyMessage = "Focus on personal goals and inner alignment today. Don't let fear of the unknown hold you back from planning.",
             numerology = 2
         ),
         TarotCard(
@@ -961,7 +1027,8 @@ object TarotCardData {
             uprightKeywords = "progress, expansion, foresight, opportunities, leadership",
             reversedKeywords = "playing small, lack of foresight, delays, frustration, missed opportunities",
             description = "The Three of Wands represents expansion and progress. Your efforts are beginning to pay off and new opportunities are emerging.",
-            dailyMessage = "Your vision is expanding today. Look ahead with confidence as new opportunities unfold.",
+            uprightDailyMessage = "Your vision is expanding today. Look ahead with confidence as new opportunities unfold.",
+            reversedDailyMessage = "Avoid playing small or lacking foresight today. Push through delays and frustration to see your progress.",
             numerology = 3
         ),
         TarotCard(
@@ -975,7 +1042,8 @@ object TarotCardData {
             uprightKeywords = "celebration, harmony, homecoming, achievement, stability, joy",
             reversedKeywords = "personal celebration, inner harmony, conflict, instability, lack of support",
             description = "The Four of Wands represents celebration and harmony. It's time to enjoy your achievements and feel supported by your community.",
-            dailyMessage = "Celebration and harmony fill your day. Take time to appreciate your achievements and those who support you.",
+            uprightDailyMessage = "Celebration and harmony fill your day. Take time to appreciate your achievements and those who support you.",
+            reversedDailyMessage = "Focus on personal celebration and inner harmony today. Address conflicts or instability in your home environment.",
             numerology = 4
         ),
         TarotCard(
@@ -989,7 +1057,8 @@ object TarotCardData {
             uprightKeywords = "conflict, competition, disagreements, tension, struggle",
             reversedKeywords = "inner conflict, avoiding conflict, cooperation, finding common ground",
             description = "The Five of Wands represents conflict and competition. While challenging, this tension can lead to growth and better solutions.",
-            dailyMessage = "Competition and diverse perspectives arise today. Use this creative tension to find innovative solutions.",
+            uprightDailyMessage = "Competition and diverse perspectives arise today. Use this creative tension to find innovative solutions.",
+            reversedDailyMessage = "Address inner conflicts and find common ground today. Cooperation brings better results than competition.",
             numerology = 5
         ),
         TarotCard(
@@ -1003,7 +1072,8 @@ object TarotCardData {
             uprightKeywords = "success, recognition, victory, confidence, progress, achievement",
             reversedKeywords = "private achievement, lack of recognition, personal success, fall from grace",
             description = "The Six of Wands represents success and public recognition. Your hard work is being acknowledged and celebrated.",
-            dailyMessage = "Success and recognition come your way today. Accept praise gracefully and share your victories.",
+            uprightDailyMessage = "Success and recognition come your way today. Accept praise gracefully and share your victories.",
+            reversedDailyMessage = "Celebrate private achievements today. Don't let lack of recognition diminish your personal definition of success.",
             numerology = 6
         ),
         TarotCard(
@@ -1017,7 +1087,8 @@ object TarotCardData {
             uprightKeywords = "challenge, perseverance, defending position, competition, maintaining control",
             reversedKeywords = "exhaustion, giving up, overwhelmed, lack of self-belief, vulnerable",
             description = "The Seven of Wands represents standing your ground and defending your position. Perseverance in the face of challenges brings victory.",
-            dailyMessage = "Stand firm in your convictions today. Your perseverance in defending what matters will pay off.",
+            uprightDailyMessage = "Stand firm in your convictions today. Your perseverance in defending what matters will pay off.",
+            reversedDailyMessage = "If you feel exhausted or overwhelmed today, take time to rebuild your self-belief before facing challenges.",
             numerology = 7
         ),
         TarotCard(
@@ -1031,7 +1102,8 @@ object TarotCardData {
             uprightKeywords = "rapid progress, speed, movement, quick decisions, communication",
             reversedKeywords = "delays, frustration, resisting change, slowing down, internal alignment",
             description = "The Eight of Wands represents rapid movement and swift progress. Things are happening quickly and communication flows freely.",
-            dailyMessage = "Events move rapidly today. Stay alert and ready to act quickly on new opportunities.",
+            uprightDailyMessage = "Events move rapidly today. Stay alert and ready to act quickly on new opportunities.",
+            reversedDailyMessage = "Delays or resistance to change may frustrate you today. Use this time for internal alignment and planning.",
             numerology = 8
         ),
         TarotCard(
@@ -1045,7 +1117,8 @@ object TarotCardData {
             uprightKeywords = "resilience, persistence, courage, boundaries, test of faith",
             reversedKeywords = "inner resources, struggle, overwhelm, defensive, paranoia",
             description = "The Nine of Wands represents resilience and the final push before success. You're close to your goal - don't give up now.",
-            dailyMessage = "Your resilience is tested today, but victory is within reach. One final push will bring success.",
+            uprightDailyMessage = "Your resilience is tested today, but victory is within reach. One final push will bring success.",
+            reversedDailyMessage = "Draw on your inner resources today. Don't let defensive paranoia or stubbornness overwhelm your judgment.",
             numerology = 9
         ),
         TarotCard(
@@ -1059,7 +1132,8 @@ object TarotCardData {
             uprightKeywords = "burden, responsibility, hard work, completion, achievement",
             reversedKeywords = "doing it all, delegation, release, burned out, letting go",
             description = "The Ten of Wands represents the burden of success and completion. You're carrying a heavy load but the finish line is in sight.",
-            dailyMessage = "Heavy responsibilities weigh on you today, but completion and success are near. Consider delegating when possible.",
+            uprightDailyMessage = "Heavy responsibilities weigh on you today, but completion and success are near. Consider delegating when possible.",
+            reversedDailyMessage = "If you're burned out from doing it all, today is the time to delegate or release some burdens.",
             numerology = 10
         ),
         TarotCard(
@@ -1073,7 +1147,8 @@ object TarotCardData {
             uprightKeywords = "inspiration, discovery, potential, free spirit, exploration, ideas",
             reversedKeywords = "newly-formed ideas, self-limiting beliefs, redirecting energy, spiritual path",
             description = "The Page of Wands represents enthusiasm and new creative ideas. Approach life with curiosity and openness to adventure.",
-            dailyMessage = "Fresh inspiration and new ideas energize you today. Embrace your adventurous spirit and explore new possibilities.",
+            uprightDailyMessage = "Fresh inspiration and new ideas energize you today. Embrace your adventurous spirit and explore new possibilities.",
+            reversedDailyMessage = "Work with newly-formed ideas and redirect your energy today. Overcome self-limiting beliefs on your spiritual path.",
             numerology = 11
         ),
         TarotCard(
@@ -1087,7 +1162,8 @@ object TarotCardData {
             uprightKeywords = "energy, passion, adventure, impulsiveness, taking action",
             reversedKeywords = "haste, scattered energy, recklessness, delays, frustration",
             description = "The Knight of Wands represents passionate action and adventure. He charges forward with enthusiasm but sometimes lacks planning.",
-            dailyMessage = "Your passionate energy drives you forward today. Channel this enthusiasm wisely to avoid reckless decisions.",
+            uprightDailyMessage = "Your passionate energy drives you forward today. Channel this enthusiasm wisely to avoid reckless decisions.",
+            reversedDailyMessage = "Focus your scattered energy on passion projects today. Avoid haste and recklessness that could cause delays.",
             numerology = 12
         ),
         TarotCard(
@@ -1101,7 +1177,8 @@ object TarotCardData {
             uprightKeywords = "confidence, independence, warmth, determination, social, courageous",
             reversedKeywords = "self-respect, introverted, insecure, re-establish sense of self",
             description = "The Queen of Wands represents confident leadership and warm charisma. She combines passion with practical wisdom.",
-            dailyMessage = "Your natural leadership and warm confidence inspire others today. Use your charisma to uplift those around you.",
+            uprightDailyMessage = "Your natural leadership and warm confidence inspire others today. Use your charisma to uplift those around you.",
+            reversedDailyMessage = "Focus on self-respect and rebuilding confidence today. It's okay to be introverted while you re-establish your sense of self.",
             numerology = 13
         ),
         TarotCard(
@@ -1115,7 +1192,8 @@ object TarotCardData {
             uprightKeywords = "leadership, vision, entrepreneur, boldness, optimism, confidence",
             reversedKeywords = "impulsiveness, ruthless, forceful, high expectations, bully",
             description = "The King of Wands represents visionary leadership and entrepreneurial spirit. He leads with passion and inspires others to achieve greatness.",
-            dailyMessage = "Your visionary leadership shines today. Inspire others with your boldness and optimistic outlook.",
+            uprightDailyMessage = "Your visionary leadership shines today. Inspire others with your boldness and optimistic outlook.",
+            reversedDailyMessage = "Avoid impulsiveness or ruthless behavior today. Channel your leadership qualities without being forceful or bullying.",
             numerology = 14
         )
     )

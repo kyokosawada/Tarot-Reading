@@ -12,7 +12,8 @@ import javax.inject.Inject
 
 data class SettingsUiState(
     val allowReversedCards: Boolean = true,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val error: String? = null
 )
 
 @HiltViewModel
@@ -33,7 +34,7 @@ class SettingsViewModel @Inject constructor(
             settingsRepository.allowReversedCards.collect { allowReversed ->
                 _uiState.value = _uiState.value.copy(
                     allowReversedCards = allowReversed,
-                    isLoading = false
+                    error = null
                 )
             }
         }
@@ -42,16 +43,27 @@ class SettingsViewModel @Inject constructor(
     fun toggleReversedCards() {
         viewModelScope.launch {
             val newValue = !_uiState.value.allowReversedCards
-            _uiState.value = _uiState.value.copy(isLoading = true)
+
+            // Optimistic update - immediately update UI
+            _uiState.value = _uiState.value.copy(
+                allowReversedCards = newValue,
+                error = null
+            )
 
             try {
                 settingsRepository.setAllowReversedCards(newValue)
-                // State will be updated automatically through the Flow
             } catch (e: Exception) {
-                // Handle error - revert loading state
-                _uiState.value = _uiState.value.copy(isLoading = false)
+                // Revert optimistic update on error
+                _uiState.value = _uiState.value.copy(
+                    allowReversedCards = !newValue,
+                    error = "Failed to update setting"
+                )
             }
         }
+    }
+
+    fun clearError() {
+        _uiState.value = _uiState.value.copy(error = null)
     }
 
 

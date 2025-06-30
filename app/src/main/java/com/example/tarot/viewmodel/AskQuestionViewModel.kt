@@ -3,6 +3,7 @@ package com.example.tarot.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tarot.data.model.TarotReadingResponse
+import com.example.tarot.data.repository.JourneyRepository
 import com.example.tarot.data.repository.OpenAiRepository
 import com.example.tarot.data.repository.SettingsRepository
 import com.example.tarot.util.ApiKeyManager
@@ -16,7 +17,8 @@ import javax.inject.Inject
 @HiltViewModel
 class AskQuestionViewModel @Inject constructor(
     private val openAiRepository: OpenAiRepository,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val journeyRepository: JourneyRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AskQuestionUiState())
@@ -46,6 +48,11 @@ class AskQuestionViewModel @Inject constructor(
 
             result.fold(
                 onSuccess = { reading ->
+                    // Increment reading journey metric on successful reading
+                    viewModelScope.launch {
+                        journeyRepository.incrementReading()
+                    }
+
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         reading = reading,
