@@ -96,5 +96,20 @@ dependencies {
     implementation(libs.okhttp.logging)
     implementation(libs.gson)
 
+    // Camera X dependencies for palm reading
+    implementation("androidx.camera:camera-core:1.3.4")
+    implementation("androidx.camera:camera-camera2:1.3.4")
+    implementation("androidx.camera:camera-lifecycle:1.3.4")
+    implementation("androidx.camera:camera-view:1.3.4")
+
+    // Permission handling
+    implementation("com.google.accompanist:accompanist-permissions:0.32.0")
+
+    // Image processing
+    implementation("androidx.exifinterface:exifinterface:1.3.7")
+
+    // Image loading for displaying captured images
+    implementation("io.coil-kt:coil-compose:2.5.0")
+
     debugImplementation(libs.androidx.ui.tooling)
 }

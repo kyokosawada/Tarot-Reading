@@ -26,6 +26,7 @@ import com.example.tarot.ui.screens.home.HomeScreen
 import com.example.tarot.ui.screens.home.ProfileScreen
 import com.example.tarot.ui.screens.reading.AskQuestionScreen
 import com.example.tarot.ui.screens.reading.DailyReadingScreen
+import com.example.tarot.ui.screens.reading.PalmReadingScreen
 import com.example.tarot.ui.screens.settings.SettingsScreen
 import com.example.tarot.viewmodel.AuthViewModel
 
@@ -41,6 +42,7 @@ object Routes {
     const val SETTINGS = "settings"
     const val DAILY_READING = "daily_reading"
     const val ASK_QUESTION = "ask_question"
+    const val PALM_READING = "palm_reading"
 }
 
 // Animation constants
@@ -293,6 +295,7 @@ fun TarotNavigation(
                         val route = when (readingType) {
                             "daily" -> Routes.DAILY_READING
                             "question" -> Routes.ASK_QUESTION
+                            "palm" -> Routes.PALM_READING
                             else -> Routes.DAILY_READING
                         }
                         navController.navigate(route)
@@ -416,6 +419,33 @@ fun TarotNavigation(
                 AskQuestionScreen(
                     onBackClick = {
                         authViewModel.clearMessages()
+                        navController.popBackStack()
+                    }
+                )
+
+                // Handle back press
+                BackHandler {
+                    navController.popBackStack()
+                }
+            }
+
+            composable(
+                route = Routes.PALM_READING,
+                enterTransition = {
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Left,
+                        animationSpec = tween(ANIMATION_DURATION)
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(ANIMATION_DURATION)
+                    )
+                }
+            ) {
+                PalmReadingScreen(
+                    onBackClick = {
                         navController.popBackStack()
                     }
                 )

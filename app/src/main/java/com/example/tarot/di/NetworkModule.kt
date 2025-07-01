@@ -1,6 +1,7 @@
 package com.example.tarot.di
 
 import com.example.tarot.data.api.OpenAiApiService
+import com.example.tarot.util.ApiKeyManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -51,5 +52,11 @@ object NetworkModule {
     @Singleton
     fun provideOpenAiApiService(retrofit: Retrofit): OpenAiApiService {
         return retrofit.create(OpenAiApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideApiKeyManager(): ApiKeyManager {
+        return ApiKeyManager
     }
 }

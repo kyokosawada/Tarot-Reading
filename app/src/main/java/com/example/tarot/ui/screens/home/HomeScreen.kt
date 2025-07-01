@@ -295,6 +295,29 @@ fun ReadingOptions(
                 fontWeight = FontWeight.Medium
             )
         }
+
+        // Palm Reading
+        OutlinedButton(
+            onClick = { onNavigateToReading("palm") },
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .height(56.dp),
+            border = ButtonDefaults.outlinedButtonBorder.copy(
+                brush = Brush.horizontalGradient(
+                    colors = listOf(MysticPurple, MysticCosmic)
+                )
+            ),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = TextPrimary
+            ),
+            shape = RoundedCornerShape(28.dp)
+        ) {
+            Text(
+                text = "Palm Reading",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
     }
 }
 
