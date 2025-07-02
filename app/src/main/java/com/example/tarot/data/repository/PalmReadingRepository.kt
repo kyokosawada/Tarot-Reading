@@ -1,5 +1,6 @@
 package com.example.tarot.data.repository
 
+import android.content.Context
 import android.util.Log
 import com.example.tarot.data.api.OpenAiApiService
 import com.example.tarot.data.model.ChatMessage
@@ -9,22 +10,39 @@ import com.example.tarot.data.model.PalmImageUrl
 import com.example.tarot.data.model.PalmMessage
 import com.example.tarot.data.model.PalmReadingRequest
 import com.example.tarot.util.ApiKeyManager
+import com.example.tarot.util.NetworkUtils
 import com.google.gson.Gson
+import dagger.hilt.android.qualifiers.ApplicationContext
+import java.io.IOException
+import java.net.ConnectException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class PalmReadingRepository @Inject constructor(
     private val apiService: OpenAiApiService,
-    private val apiKeyManager: ApiKeyManager
+    private val apiKeyManager: ApiKeyManager,
+    @ApplicationContext private val context: Context
 ) {
     private val tag = "PalmReadingRepository"
 
     suspend fun analyzePalmImage(imageBase64: String): Result<String> {
         return try {
+            // Check if API key is configured
             if (!apiKeyManager.isApiKeyConfigured()) {
-                return Result.failure(Exception("OpenAI API key not configured"))
+                Log.w(tag, "OpenAI API key not configured")
+                return Result.failure(Exception("OpenAI API key not configured. Please add your API key to use this feature."))
             }
+
+            // Check network connectivity first
+            if (!NetworkUtils.isNetworkAvailable(context)) {
+                Log.w(tag, "No network connection")
+                return Result.failure(Exception("No internet connection"))
+            }
+
+            Log.d(tag, "Starting palm reading analysis...")
 
             // Step 1: Get educational analysis of the palm image
             Log.d(tag, "Step 1: Getting educational analysis...")
@@ -35,9 +53,14 @@ class PalmReadingRepository @Inject constructor(
             )
 
             if (!educationalResponse.isSuccessful) {
-                val errorBody = educationalResponse.errorBody()?.string()
-                Log.e(tag, "Educational analysis API error: $errorBody")
-                return Result.failure(Exception("Failed to analyze palm: ${educationalResponse.message()}"))
+                val errorMsg = when (educationalResponse.code()) {
+                    401 -> "Invalid API key"
+                    429 -> "Rate limit exceeded"
+                    500, 502, 503 -> "Server unavailable"
+                    else -> "API Error: ${educationalResponse.code()}"
+                }
+                Log.e(tag, "Educational analysis API error: $errorMsg")
+                return Result.failure(Exception(errorMsg))
             }
 
             val educationalAnalysis =
@@ -60,13 +83,35 @@ class PalmReadingRepository @Inject constructor(
                 Log.d(tag, "Engaging reading created successfully")
                 Result.success(result)
             } else {
-                val errorBody = engagingResponse.errorBody()?.string()
-                Log.e(tag, "Engaging reading API error: $errorBody")
-                Result.failure(Exception("Failed to create engaging reading: ${engagingResponse.message()}"))
+                val errorMsg = when (engagingResponse.code()) {
+                    401 -> "Invalid API key"
+                    429 -> "Rate limit exceeded"
+                    500, 502, 503 -> "Server unavailable"
+                    else -> "API Error: ${engagingResponse.code()}"
+                }
+                Log.e(tag, "Engaging reading API error: $errorMsg")
+                Result.failure(Exception(errorMsg))
             }
+        } catch (e: UnknownHostException) {
+            val errorMsg = NetworkUtils.getNetworkErrorMessage(e)
+            Log.e(tag, "Network error - UnknownHostException", e)
+            Result.failure(Exception(errorMsg))
+        } catch (e: ConnectException) {
+            val errorMsg = NetworkUtils.getNetworkErrorMessage(e)
+            Log.e(tag, "Network error - ConnectException", e)
+            Result.failure(Exception(errorMsg))
+        } catch (e: SocketTimeoutException) {
+            val errorMsg = NetworkUtils.getNetworkErrorMessage(e)
+            Log.e(tag, "Network error - SocketTimeoutException", e)
+            Result.failure(Exception(errorMsg))
+        } catch (e: IOException) {
+            val errorMsg = NetworkUtils.getNetworkErrorMessage(e)
+            Log.e(tag, "Network error - IOException", e)
+            Result.failure(Exception(errorMsg))
         } catch (e: Exception) {
-            Log.e(tag, "Error analyzing palm", e)
-            Result.failure(e)
+            val errorMsg = NetworkUtils.getNetworkErrorMessage(e)
+            Log.e(tag, "Unexpected error during palm reading analysis", e)
+            Result.failure(Exception(errorMsg))
         }
     }
 

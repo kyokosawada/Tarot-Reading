@@ -32,9 +32,12 @@ object NetworkModule {
     ): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(
+                90,
+                TimeUnit.SECONDS
+            ) // Increased timeout for palm reading AI processing
+            .readTimeout(90, TimeUnit.SECONDS) // Allows sufficient time for AI analysis
+            .writeTimeout(90, TimeUnit.SECONDS) // Extended write timeout for image uploads
             .build()
     }
 

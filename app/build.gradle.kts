@@ -80,14 +80,14 @@ dependencies {
     implementation(libs.androidx.datastore)
     
     // Firebase BoM
-    implementation(platform("com.google.firebase:firebase-bom:33.15.0"))
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-firestore")
+    implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
     // Removed firebase analytics
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
-    implementation("com.google.android.gms:play-services-auth:21.2.0")
+    implementation(libs.play.services.auth)
 
     // OpenAI API and HTTP client
     implementation(libs.retrofit)
@@ -97,19 +97,19 @@ dependencies {
     implementation(libs.gson)
 
     // Camera X dependencies for palm reading
-    implementation("androidx.camera:camera-core:1.3.4")
-    implementation("androidx.camera:camera-camera2:1.3.4")
-    implementation("androidx.camera:camera-lifecycle:1.3.4")
-    implementation("androidx.camera:camera-view:1.3.4")
+    implementation(libs.camera.core)
+    implementation(libs.camera.camera2)
+    implementation(libs.camera.lifecycle)
+    implementation(libs.camera.view)
 
-    // Permission handling
-    implementation("com.google.accompanist:accompanist-permissions:0.32.0")
+    // Modern permissions - Using ActivityResultContracts (no Accompanist needed)
 
     // Image processing
-    implementation("androidx.exifinterface:exifinterface:1.3.7")
+    implementation(libs.androidx.exifinterface)
 
-    // Image loading for displaying captured images
-    implementation("io.coil-kt:coil-compose:2.5.0")
+    // Modern image loading with Coil 3.x
+    implementation("io.coil-kt.coil3:coil-compose:3.2.0")
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.2.0")
 
     debugImplementation(libs.androidx.ui.tooling)
 }

@@ -2,6 +2,7 @@ package com.example.tarot.ui.screens.reading
 
 import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -26,6 +27,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -43,20 +45,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.tarot.util.CameraUtils
 import com.example.tarot.viewmodel.PalmReadingViewModel
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
-import com.google.accompanist.permissions.shouldShowRationale
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun PalmReadingScreen(
     onBackClick: () -> Unit,
@@ -65,15 +64,42 @@ fun PalmReadingScreen(
     val uiState by palmReadingViewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    // Permission state for CAMERA
-    val cameraPermissionState = rememberPermissionState(permission = Manifest.permission.CAMERA)
-
+    // Modern permission state management
+    var showPermissionRationale by remember { mutableStateOf(false) }
+    
+    // Modern permission launcher
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
         if (success && imageUri != null) {
             palmReadingViewModel.analyzePalmImage(imageUri!!, context)
+        }
+    }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            showPermissionRationale = false
+            // Permission granted, take picture
+            takePicture(context, cameraLauncher) { uri -> imageUri = uri }
+        } else {
+            showPermissionRationale = true
+        }
+    }
+
+    // Check permission state
+    val hasCameraPermission = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.CAMERA
+    ) == PackageManager.PERMISSION_GRANTED
+
+    // Handle capture action
+    fun captureImage() {
+        if (hasCameraPermission) {
+            takePicture(context, cameraLauncher) { uri -> imageUri = uri }
+        } else {
+            permissionLauncher.launch(Manifest.permission.CAMERA)
         }
     }
 
@@ -101,6 +127,18 @@ fun PalmReadingScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // Show error if present
+        uiState.error?.let { error ->
+            ErrorCard(
+                error = error,
+                onRetry = if (imageUri != null) {
+                    { palmReadingViewModel.analyzePalmImage(imageUri!!, context) }
+                } else null,
+                onDismiss = { palmReadingViewModel.clearError() }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
         when {
             uiState.isLoading -> {
                 LoadingContent()
@@ -113,60 +151,76 @@ fun PalmReadingScreen(
                         imageUri = uiState.imageUri,
                         onNewReading = {
                             palmReadingViewModel.clearReading()
-                            if (cameraPermissionState.status.isGranted) {
-                                takePicture(context, cameraLauncher) { uri -> imageUri = uri }
-                            } else {
-                                cameraPermissionState.launchPermissionRequest()
-                            }
+                            captureImage()
                         }
                     )
                 }
             }
             else -> {
                 CaptureInstructionsContent(
-                    onCaptureClick = {
-                        if (cameraPermissionState.status.isGranted) {
-                            takePicture(context, cameraLauncher) { uri -> imageUri = uri }
-                        } else {
-                            cameraPermissionState.launchPermissionRequest()
-                        }
-                    },
-                    showPermissionRationale = cameraPermissionState.status.shouldShowRationale || !cameraPermissionState.status.isGranted,
-                    permissionStatusGranted = cameraPermissionState.status.isGranted
+                    onCaptureClick = { captureImage() },
+                    showPermissionRationale = showPermissionRationale || !hasCameraPermission,
+                    permissionStatusGranted = hasCameraPermission
                 )
             }
         }
 
-        // Error display card
-        uiState.error?.let { error ->
-            Spacer(modifier = Modifier.height(16.dp))
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
+    }
+}
+
+@Composable
+fun ErrorCard(
+    error: String,
+    onRetry: (() -> Unit)? = null,
+    onDismiss: () -> Unit
+) {
+    androidx.compose.material3.Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = androidx.compose.material3.CardDefaults.cardColors(
+            containerColor = Color.Red.copy(alpha = 0.8f)
+        ),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = "⚠️ $error",
+                fontSize = 14.sp,
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            if (onRetry != null) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(
-                        text = "Error",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onErrorContainer
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = error,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onErrorContainer
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
                     TextButton(
-                        onClick = { palmReadingViewModel.clearError() }
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f)
                     ) {
-                        Text("Dismiss")
+                        Text("Dismiss", color = Color.White)
                     }
+                    Button(
+                        onClick = onRetry,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.White.copy(alpha = 0.2f)
+                        )
+                    ) {
+                        Text("Retry", color = Color.White)
+                    }
+                }
+            } else {
+                Spacer(modifier = Modifier.height(8.dp))
+                TextButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Dismiss", color = Color.White)
                 }
             }
         }
