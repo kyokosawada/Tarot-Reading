@@ -6,13 +6,11 @@ import com.example.tarot.data.FirebaseRepository
 import com.example.tarot.data.model.TarotCard
 import com.example.tarot.data.repository.JourneyRepository
 import com.example.tarot.data.repository.TarotRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 data class HomeUiState(
     val isLoading: Boolean = false,
@@ -46,8 +44,7 @@ data class UserStats(
     val experiencePoints: Int = 0
 )
 
-@HiltViewModel
-class HomeViewModel @Inject constructor(
+class HomeViewModel(
     private val firebaseRepository: FirebaseRepository,
     private val tarotRepository: TarotRepository,
     private val journeyRepository: JourneyRepository

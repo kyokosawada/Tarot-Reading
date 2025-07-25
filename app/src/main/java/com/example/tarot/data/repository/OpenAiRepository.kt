@@ -9,20 +9,16 @@ import com.example.tarot.data.model.TarotCard
 import com.example.tarot.data.model.TarotReadingResponse
 import com.example.tarot.util.ApiKeyManager
 import com.example.tarot.util.NetworkUtils
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.IOException
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.random.Random
 
-@Singleton
-class OpenAiRepository @Inject constructor(
+class OpenAiRepository(
     private val openAiApiService: OpenAiApiService,
     private val tarotRepository: TarotRepository,
-    @ApplicationContext private val context: Context
+    private val context: Context
 ) {
     companion object {
         private const val TAG = "OpenAiRepository"

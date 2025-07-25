@@ -52,14 +52,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.tarot.util.CameraUtils
 import com.example.tarot.viewmodel.PalmReadingViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun PalmReadingScreen(
-    onBackClick: () -> Unit,
-    palmReadingViewModel: PalmReadingViewModel = hiltViewModel()
+    onBackClick: () -> Unit = {},
+    palmReadingViewModel: PalmReadingViewModel = koinViewModel()
 ) {
     val uiState by palmReadingViewModel.uiState.collectAsState()
     val context = LocalContext.current

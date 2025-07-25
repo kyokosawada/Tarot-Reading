@@ -1,16 +1,19 @@
 package com.example.tarot
 
 import android.app.Application
-import com.example.tarot.util.CameraUtils
-import dagger.hilt.android.HiltAndroidApp
+import com.example.tarot.di.appModule
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.startKoin
 
-@HiltAndroidApp
 class TarotApplication : Application() {
-
     override fun onCreate() {
         super.onCreate()
 
-        // Clean up any old palm reading images on app startup
-        CameraUtils.cleanupOldPalmImages(this)
+        startKoin {
+            androidLogger()
+            androidContext(this@TarotApplication)
+            modules(appModule)
+        }
     }
 }

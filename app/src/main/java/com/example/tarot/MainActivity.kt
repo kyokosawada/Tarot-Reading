@@ -9,13 +9,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.tarot.navigation.TarotNavigation
 import com.example.tarot.ui.theme.TarotTheme
 import com.example.tarot.viewmodel.AuthViewModel
-import dagger.hilt.android.AndroidEntryPoint
+import org.koin.androidx.compose.koinViewModel
 
-@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,7 +33,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun TarotApp() {
-    val authViewModel: AuthViewModel = hiltViewModel()
+    val authViewModel: AuthViewModel = koinViewModel()
 
     TarotNavigation(
         authViewModel = authViewModel

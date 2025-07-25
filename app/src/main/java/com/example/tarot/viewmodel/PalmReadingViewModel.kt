@@ -9,7 +9,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tarot.data.repository.PalmReadingRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,11 +16,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
-import javax.inject.Inject
 import kotlin.math.min
 
-@HiltViewModel
-class PalmReadingViewModel @Inject constructor(
+class PalmReadingViewModel(
     private val palmReadingRepository: PalmReadingRepository
 ) : ViewModel() {
 

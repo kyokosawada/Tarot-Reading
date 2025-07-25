@@ -10,7 +10,6 @@ import com.example.tarot.data.model.getUprightKeywordsList
 import com.example.tarot.data.repository.JourneyRepository
 import com.example.tarot.data.repository.SettingsRepository
 import com.example.tarot.data.repository.TarotRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,7 +17,6 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import javax.inject.Inject
 import kotlin.random.Random
 
 data class DailyReadingUiState(
@@ -34,8 +32,7 @@ data class DailyReadingUiState(
     val streakStatus: JourneyRepository.StreakStatus? = null // Add streak tracking
 )
 
-@HiltViewModel
-class DailyReadingViewModel @Inject constructor(
+class DailyReadingViewModel(
     private val tarotRepository: TarotRepository,
     private val settingsRepository: SettingsRepository,
     private val journeyRepository: JourneyRepository

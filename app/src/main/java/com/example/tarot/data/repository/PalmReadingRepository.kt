@@ -12,19 +12,15 @@ import com.example.tarot.data.model.PalmReadingRequest
 import com.example.tarot.util.ApiKeyManager
 import com.example.tarot.util.NetworkUtils
 import com.google.gson.Gson
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.IOException
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class PalmReadingRepository @Inject constructor(
+class PalmReadingRepository(
     private val apiService: OpenAiApiService,
     private val apiKeyManager: ApiKeyManager,
-    @ApplicationContext private val context: Context
+    private val context: Context
 ) {
     private val tag = "PalmReadingRepository"
 

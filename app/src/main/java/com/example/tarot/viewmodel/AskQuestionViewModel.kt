@@ -7,15 +7,12 @@ import com.example.tarot.data.repository.JourneyRepository
 import com.example.tarot.data.repository.OpenAiRepository
 import com.example.tarot.data.repository.SettingsRepository
 import com.example.tarot.util.ApiKeyManager
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class AskQuestionViewModel @Inject constructor(
+class AskQuestionViewModel(
     private val openAiRepository: OpenAiRepository,
     private val settingsRepository: SettingsRepository,
     private val journeyRepository: JourneyRepository

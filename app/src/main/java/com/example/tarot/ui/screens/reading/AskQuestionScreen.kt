@@ -51,7 +51,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.tarot.data.model.TarotReadingResponse
 import com.example.tarot.ui.components.MysticCardBack
 import com.example.tarot.ui.components.MysticCardFront
@@ -67,13 +66,14 @@ import com.example.tarot.ui.theme.TextAccent
 import com.example.tarot.ui.theme.TextPrimary
 import com.example.tarot.ui.theme.TextSecondary
 import com.example.tarot.viewmodel.AskQuestionViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AskQuestionScreen(
     onBackClick: () -> Unit = {},
     modifier: Modifier = Modifier,
-    viewModel: AskQuestionViewModel = hiltViewModel()
+    viewModel: AskQuestionViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var question by remember { mutableStateOf("") }

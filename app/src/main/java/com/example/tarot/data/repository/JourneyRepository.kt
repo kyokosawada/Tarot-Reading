@@ -10,11 +10,8 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class JourneyRepository @Inject constructor(
+class JourneyRepository(
     private val firebaseRepository: FirebaseRepository,
     private val tarotRepository: TarotRepository
 ) {

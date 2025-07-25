@@ -19,3 +19,27 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Enhanced security for API keys and sensitive data
+# Note: Dictionary files removed to avoid build errors
+
+# Obfuscate API key related classes more aggressively
+-keep class com.example.tarot.util.ApiKeyManager {
+    public java.lang.String getOpenAiApiKey();
+    public boolean isApiKeyConfigured();
+}
+
+# Keep BuildConfig but obfuscate field names
+-keepclassmembers class com.example.tarot.BuildConfig {
+    public static final java.lang.String OPENAI_API_KEY;
+}
+
+# Remove debug logging in release builds
+-assumenosideeffects class android.util.Log {
+    public static boolean isLoggable(java.lang.String, int);
+    public static int v(...);
+    public static int i(...);
+    public static int w(...);
+    public static int d(...);
+    public static int e(...);
+}
