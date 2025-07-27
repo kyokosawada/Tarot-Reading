@@ -13,7 +13,7 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.tarot"
+        applicationId = "com.example.tarot.demo"
         minSdk = 24
         targetSdk = 35
         versionCode = 1

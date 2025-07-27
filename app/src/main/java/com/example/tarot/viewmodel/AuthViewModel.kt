@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import javax.inject.Inject
 
 data class AuthUiState(
     val isLoading: Boolean = false,
@@ -27,7 +26,8 @@ data class AuthUiState(
     val user: User? = null,
     val signupSuccess: Boolean = false,
     val successMessage: String? = null,
-    val needsProfileCompletion: Boolean = false
+    val needsProfileCompletion: Boolean = false,
+    val isSigningUp: Boolean = false // New: Track if user is in signup process
 )
 
 data class User(
@@ -72,10 +72,19 @@ class AuthViewModel(
 
     // Web client ID from Firebase Console
     private val webClientId =
-        "972003711031-4o27g7sjiet4kqq1l12j15ig0ji36ik3.apps.googleusercontent.com"
+        "950119670288-2s5etor3psr4b334jr9m0jlje5clknel.apps.googleusercontent.com"
+
+    // Flag to prevent auth state listener from interfering during initialization
+    private var isInitializing = true
 
     // Auth state listener to monitor token persistence
     private val authStateListener = FirebaseAuth.AuthStateListener { auth ->
+        // Skip if we're still initializing to prevent race conditions
+        if (isInitializing) {
+            Log.d(TAG, "Skipping AuthStateListener during initialization")
+            return@AuthStateListener
+        }
+
         Log.d(TAG, "Firebase AuthStateListener triggered")
         Log.d(TAG, "Current user from listener: ${auth.currentUser?.uid}")
         Log.d(TAG, "Current user email: ${auth.currentUser?.email}")
@@ -99,13 +108,13 @@ class AuthViewModel(
     init {
         Log.d(TAG, "AuthViewModel initializing...")
 
-        // Add auth state listener first
-        firebaseAuth.addAuthStateListener(authStateListener)
-        Log.d(TAG, "AuthStateListener added")
-
-        // Check if user is already logged in
+        // Check if user is already logged in first
         viewModelScope.launch {
             checkCurrentUser()
+            // Mark initialization as complete and add auth state listener
+            isInitializing = false
+            firebaseAuth.addAuthStateListener(authStateListener)
+            Log.d(TAG, "AuthStateListener added after initialization")
             _uiState.value = _uiState.value.copy(isInitializing = false)
         }
     }
@@ -124,7 +133,8 @@ class AuthViewModel(
                     user = null,
                     signupSuccess = false,
                     successMessage = null,
-                    needsProfileCompletion = false
+                    needsProfileCompletion = false,
+                    isSigningUp = false
                 )
                 Log.d(TAG, "Firebase Auth cache cleared successfully")
             } catch (e: Exception) {
@@ -143,12 +153,15 @@ class AuthViewModel(
             loadUserProfileFromFirestore(currentUser)
         } else {
             Log.d(TAG, "No current user found, setting as logged out")
-            // User is not logged in
-            _uiState.value = _uiState.value.copy(
-                isLoggedIn = false,
-                user = null,
-                needsProfileCompletion = false
-            )
+            // User is not logged in - only update if different from current state
+            val currentState = _uiState.value
+            if (currentState.isLoggedIn != false || currentState.user != null) {
+                _uiState.value = _uiState.value.copy(
+                    isLoggedIn = false,
+                    user = null,
+                    needsProfileCompletion = false
+                )
+            }
         }
     }
 
@@ -176,11 +189,21 @@ class AuthViewModel(
                 )
 
                 Log.d(TAG, "Setting user as logged in. Profile complete: ${user.isProfileComplete}")
-                _uiState.value = _uiState.value.copy(
-                    isLoggedIn = true,
-                    user = user,
-                    needsProfileCompletion = !user.isProfileComplete
-                )
+
+                // Only update UI state if it's actually different to prevent unnecessary re-renders
+                val currentState = _uiState.value
+                if (currentState.user?.id != user.id ||
+                    currentState.user?.isProfileComplete != user.isProfileComplete ||
+                    currentState.isLoggedIn != true
+                ) {
+
+                    _uiState.value = _uiState.value.copy(
+                        isLoggedIn = true,
+                        user = user,
+                        needsProfileCompletion = !user.isProfileComplete,
+                        errorMessage = null
+                    )
+                }
             },
             onFailure = { error ->
                 Log.e(TAG, "Failed to load Firestore profile: ${error.message}", error)
@@ -196,11 +219,20 @@ class AuthViewModel(
                 )
 
                 Log.d(TAG, "Using fallback user data, setting profile completion needed")
-                _uiState.value = _uiState.value.copy(
-                    isLoggedIn = true,
-                    user = user,
-                    needsProfileCompletion = true
-                )
+
+                // Only update UI state if it's actually different
+                val currentState = _uiState.value
+                if (currentState.user?.id != user.id ||
+                    currentState.isLoggedIn != true
+                ) {
+
+                    _uiState.value = _uiState.value.copy(
+                        isLoggedIn = true,
+                        user = user,
+                        needsProfileCompletion = true,
+                        errorMessage = null
+                    )
+                }
             }
         )
     }
@@ -405,15 +437,21 @@ class AuthViewModel(
 
             } catch (e: GetCredentialException) {
                 Log.e(TAG, "Google sign-in cancelled or failed: ${e.message}", e)
+                val errorMessage = when {
+                    e.message?.contains("cancelled") == true -> "Google sign-in was cancelled. Please try again."
+                    e.message?.contains("28444") == true -> "Google sign-in configuration error. Please contact support."
+                    e.message?.contains("network") == true -> "Network error. Please check your connection and try again."
+                    else -> "Google sign-in failed. Please try again or use email/password login."
+                }
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    errorMessage = "Google sign-in cancelled or failed: ${e.message}"
+                    errorMessage = errorMessage
                 )
             } catch (e: Exception) {
                 Log.e(TAG, "Google sign-in failed with exception: ${e.message}", e)
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    errorMessage = "Google sign-in failed: ${e.message}"
+                    errorMessage = "Google sign-in failed. Please try again or use email/password login."
                 )
             }
         }
@@ -511,11 +549,29 @@ class AuthViewModel(
                     )
                 }
 
+            } catch (e: com.google.firebase.auth.FirebaseAuthInvalidUserException) {
+                Log.e(TAG, "Login failed: user not found", e)
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    errorMessage = "No account found with this email address. Please check your email or sign up for a new account."
+                )
+            } catch (e: com.google.firebase.auth.FirebaseAuthInvalidCredentialsException) {
+                Log.e(TAG, "Login failed: invalid credentials", e)
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    errorMessage = "Incorrect password. Please try again or use the 'Forgot Password' option."
+                )
+            } catch (e: com.google.firebase.auth.FirebaseAuthException) {
+                Log.e(TAG, "Login failed with Firebase Auth exception: ${e.message}", e)
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    errorMessage = "Authentication failed: ${e.message ?: "Unknown error"}"
+                )
             } catch (e: Exception) {
                 Log.e(TAG, "Login failed with exception: ${e.message}", e)
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    errorMessage = "Login failed: ${e.message}"
+                    errorMessage = "Login failed. Please check your internet connection and try again."
                 )
             }
         }
@@ -531,13 +587,18 @@ class AuthViewModel(
         viewModelScope.launch {
             try {
                 Log.d(TAG, "Sign up initiated for: $email")
-                _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+                _uiState.value = _uiState.value.copy(
+                    isLoading = true,
+                    isSigningUp = true, // Set signup flag
+                    errorMessage = null
+                )
 
                 // Basic validation
                 if (name.isBlank() || email.isBlank() || password.isBlank()) {
                     Log.d(TAG, "Sign up failed: empty fields")
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
+                        isSigningUp = false, // Clear signup flag
                         errorMessage = "Please fill in all fields"
                     )
                     return@launch
@@ -547,6 +608,7 @@ class AuthViewModel(
                     Log.d(TAG, "Sign up failed: invalid email format")
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
+                        isSigningUp = false, // Clear signup flag
                         errorMessage = "Please enter a valid email address"
                     )
                     return@launch
@@ -556,6 +618,7 @@ class AuthViewModel(
                     Log.d(TAG, "Sign up failed: password too short")
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
+                        isSigningUp = false, // Clear signup flag
                         errorMessage = "Password must be at least 6 characters"
                     )
                     return@launch
@@ -576,35 +639,111 @@ class AuthViewModel(
 
                     val isProfileComplete = birthMonth != null && birthYear != null
 
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        signupSuccess = true,
-                        successMessage = "Sign up successful! Please log in.",
-                        user = User(
-                            id = firebaseUser.uid,
-                            name = name,
-                            email = firebaseUser.email ?: "",
-                            username = null,
-                            birthMonth = birthMonth,
-                            birthYear = birthYear,
-                            isProfileComplete = isProfileComplete,
-                            createdAt = System.currentTimeMillis()
-                        ),
-                        errorMessage = null
+                    // Create user object
+                    val user = User(
+                        id = firebaseUser.uid,
+                        name = name,
+                        email = firebaseUser.email ?: email,
+                        username = null,
+                        birthMonth = birthMonth,
+                        birthYear = birthYear,
+                        isProfileComplete = isProfileComplete,
+                        createdAt = System.currentTimeMillis()
+                    )
+
+                    // Save user profile to Firestore
+                    val saveResult = firebaseRepository.saveUserProfile(user)
+                    saveResult.fold(
+                        onSuccess = {
+                            Log.d(TAG, "User profile saved successfully to Firestore")
+                            if (isProfileComplete) {
+                                // Profile is complete, log user in directly - no profile completion needed
+                                _uiState.value = _uiState.value.copy(
+                                    isLoading = false,
+                                    isSigningUp = false, // Clear signup flag
+                                    isInitializing = false, // Ensure we're not in initializing state
+                                    isLoggedIn = true,
+                                    user = user,
+                                    needsProfileCompletion = false, // Explicitly set to false
+                                    signupSuccess = false, // Don't show signup success, go directly to home
+                                    successMessage = "Welcome to Mystica! Your account has been created.",
+                                    errorMessage = null
+                                )
+                            } else {
+                                // Profile needs completion, but user is logged in
+                                _uiState.value = _uiState.value.copy(
+                                    isLoading = false,
+                                    isSigningUp = false, // Clear signup flag
+                                    isInitializing = false, // Ensure we're not in initializing state
+                                    isLoggedIn = true,
+                                    user = user,
+                                    needsProfileCompletion = true, // Only set to true if profile is incomplete
+                                    signupSuccess = false, // Don't show signup success, go to profile completion
+                                    successMessage = null,
+                                    errorMessage = null
+                                )
+                            }
+                        },
+                        onFailure = { error ->
+                            Log.e(TAG, "Failed to save user profile to Firestore: ${error.message}")
+                            // Even if Firestore save fails, we can proceed with the authentication
+                            // The profile will be created when they complete profile or login again
+                            _uiState.value = _uiState.value.copy(
+                                isLoading = false,
+                                isSigningUp = false, // Clear signup flag
+                                isInitializing = false, // Ensure we're not in initializing state
+                                isLoggedIn = true,
+                                user = user,
+                                needsProfileCompletion = !isProfileComplete, // Use negation of isProfileComplete
+                                signupSuccess = false,
+                                successMessage = if (isProfileComplete) "Welcome to Mystica! Your account has been created." else null,
+                                errorMessage = null
+                            )
+                        }
                     )
                 } else {
                     Log.e(TAG, "Sign up failed: firebaseUser is null")
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        errorMessage = "Sign up failed"
+                        isSigningUp = false, // Clear signup flag
+                        errorMessage = "Sign up failed. Please try again."
                     )
                 }
 
+            } catch (e: com.google.firebase.auth.FirebaseAuthUserCollisionException) {
+                Log.e(TAG, "Sign up failed: email already in use", e)
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    isSigningUp = false, // Clear signup flag
+                    errorMessage = "This email address is already registered. Please use a different email or try logging in instead."
+                )
+            } catch (e: com.google.firebase.auth.FirebaseAuthWeakPasswordException) {
+                Log.e(TAG, "Sign up failed: weak password", e)
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    isSigningUp = false, // Clear signup flag
+                    errorMessage = "Password is too weak. Please choose a stronger password with at least 6 characters."
+                )
+            } catch (e: com.google.firebase.auth.FirebaseAuthInvalidCredentialsException) {
+                Log.e(TAG, "Sign up failed: invalid credentials", e)
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    isSigningUp = false, // Clear signup flag
+                    errorMessage = "Invalid email address format. Please enter a valid email."
+                )
+            } catch (e: com.google.firebase.auth.FirebaseAuthException) {
+                Log.e(TAG, "Sign up failed with Firebase Auth exception: ${e.message}", e)
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    isSigningUp = false, // Clear signup flag
+                    errorMessage = "Authentication failed: ${e.message ?: "Unknown error"}"
+                )
             } catch (e: Exception) {
                 Log.e(TAG, "Sign up failed with exception: ${e.message}", e)
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    errorMessage = "Sign up failed: ${e.message}"
+                    isSigningUp = false, // Clear signup flag
+                    errorMessage = "Sign up failed. Please check your internet connection and try again."
                 )
             }
         }
@@ -624,7 +763,8 @@ class AuthViewModel(
                     user = null,
                     signupSuccess = false,
                     successMessage = null,
-                    needsProfileCompletion = false
+                    needsProfileCompletion = false,
+                    isSigningUp = false
                 )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(

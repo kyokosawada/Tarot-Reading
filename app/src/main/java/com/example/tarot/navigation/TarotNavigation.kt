@@ -63,10 +63,11 @@ fun TarotNavigation(
     LaunchedEffect(
         authUiState.isInitializing,
         authUiState.isLoggedIn,
-        authUiState.needsProfileCompletion
+        authUiState.needsProfileCompletion,
+        authUiState.isSigningUp
     ) {
-        // Wait for initialization to complete
-        if (!authUiState.isInitializing) {
+        // Wait for initialization to complete and signup to finish
+        if (!authUiState.isInitializing && !authUiState.isSigningUp) {
             try {
                 when {
                     authUiState.signupSuccess -> {
