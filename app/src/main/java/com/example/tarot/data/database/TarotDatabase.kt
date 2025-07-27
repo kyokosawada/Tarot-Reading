@@ -1,8 +1,6 @@
 package com.example.tarot.data.database
 
-import android.content.Context
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
@@ -15,7 +13,7 @@ import com.example.tarot.data.model.TarotCard
 
 @Database(
     entities = [TarotCard::class, DailyReading::class],
-    version = 4,
+    version = 5,
     exportSchema = true
 )
 @TypeConverters(Converters::class)

@@ -183,8 +183,25 @@ fun DailyReadingScreen(
                         color = MysticGold,
                         modifier = Modifier.padding(32.dp)
                     )
-                } else if (uiState.dailyCard != null) {
-                    // Tarot Card - always show when card is available
+                } else if (uiState.dailyCard != null && !uiState.isGuidanceReady) {
+                    // Show loading state when card is drawn but guidance is not ready
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(32.dp)
+                    ) {
+                        CircularProgressIndicator(
+                            color = MysticGold,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                        Text(
+                            text = "Preparing your daily guidance...",
+                            fontSize = 16.sp,
+                            color = TextSecondary,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                } else if (uiState.dailyCard != null && uiState.isGuidanceReady) {
+                    // Tarot Card - always show when card is available AND guidance is ready
                     val interactionSource = remember { MutableInteractionSource() }
 
                     Box(
@@ -194,7 +211,7 @@ fun DailyReadingScreen(
                                 interactionSource = interactionSource,
                                 indication = null
                             ) {
-                                if (!uiState.isCardRevealed) {
+                                if (!uiState.isCardRevealed && !uiState.isProcessingReveal) {
                                     viewModel.revealCard()
                                 }
                             }
@@ -233,6 +250,19 @@ fun DailyReadingScreen(
                             )
                         )
                     }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Personalized Guidance - Only show when AI response is ready or there's an error
+                if (uiState.isCardRevealed && (uiState.aiGeneratedMessage != null || uiState.aiError != null)) {
+                    PersonalizedGuidanceMessage(
+                        personalizedMessage = uiState.aiGeneratedMessage,
+                        isLoading = uiState.isAiLoading,
+                        error = uiState.aiError,
+                        onRetryClick = { viewModel.retryAiGeneration() },
+                        onClearError = { viewModel.clearAiError() }
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -323,6 +353,77 @@ fun CardInterpretation(
     }
 }
 
+
+@Composable
+fun PersonalizedGuidanceMessage(
+    personalizedMessage: String?,
+    isLoading: Boolean,
+    error: String?,
+    onRetryClick: () -> Unit,
+    onClearError: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MysticNavy.copy(alpha = 0.8f)
+        ),
+        shape = RoundedCornerShape(20.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(24.dp)
+        ) {
+            // Title
+            Text(
+                text = "Personalized Guidance",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = MysticGold,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+
+            when {
+                error != null -> {
+                    // Error state
+                    Text(
+                        text = error,
+                        fontSize = 14.sp,
+                        color = androidx.compose.ui.graphics.Color.Red.copy(alpha = 0.8f),
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+
+                    androidx.compose.material3.Button(
+                        onClick = {
+                            onClearError()
+                            onRetryClick()
+                        },
+                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                            containerColor = MysticGold
+                        ),
+                        modifier = Modifier.padding(top = 8.dp)
+                    ) {
+                        Text(
+                            text = "Retry",
+                            color = MysticDarkBlue,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+
+                personalizedMessage != null -> {
+                    // Success state
+                    Text(
+                        text = personalizedMessage,
+                        fontSize = 14.sp,
+                        color = TextPrimary,
+                        lineHeight = 20.sp
+                    )
+
+                    // Removed the "Generated through advanced reasoning" text as requested
+                }
+            }
+        }
+    }
+}
 
 @Preview(showBackground = true)
 @Composable

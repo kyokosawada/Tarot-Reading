@@ -130,7 +130,8 @@ val appModule = module {
         DailyReadingViewModel(
             tarotRepository = get(),
             settingsRepository = get(),
-            journeyRepository = get()
+            journeyRepository = get(),
+            openAiRepository = get()
         )
     }
     

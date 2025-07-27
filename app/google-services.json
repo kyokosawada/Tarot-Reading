@@ -14,6 +14,75 @@
       },
       "oauth_client": [
         {
+          "client_id": "972003711031-603u5ggq4clnh4q5uoeson8g8oj9f7es.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.tarot",
+            "certificate_hash": "26c01d9eb78f8b43dabf5f0e90a1c8c3a1e1a915"
+          }
+        },
+        {
+          "client_id": "972003711031-4o27g7sjiet4kqq1l12j15ig0ji36ik3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0AVxOCF1PisHWHlEcDVCSnaDmo9RrJo0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "972003711031-4o27g7sjiet4kqq1l12j15ig0ji36ik3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:972003711031:android:56563fc0c142d31e7847b2",
+        "android_client_info": {
+          "package_name": "com.kyokosawada.mystica"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "972003711031-86n9fro7hcffrgueqa3o71vt1scu8dlv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kyokosawada.mystica",
+            "certificate_hash": "26c01d9eb78f8b43dabf5f0e90a1c8c3a1e1a915"
+          }
+        },
+        {
+          "client_id": "972003711031-icjijntageb9v9hpv90ne4fd3qbsahbv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kyokosawada.mystica",
+            "certificate_hash": "62a4190e9a9d948b03db1bfd34741a097b7503b0"
+          }
+        },
+        {
+          "client_id": "972003711031-lnnri3tvqlvp8850m6sfn4pg8jj0ig0a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kyokosawada.mystica",
+            "certificate_hash": "9d23195e4f430251b37d40a4b12d5c89ddbc0388"
+          }
+        },
+        {
+          "client_id": "972003711031-m880v5dkkqaembdc4c1a3o4fit79utf0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kyokosawada.mystica",
+            "certificate_hash": "8696413725645200b7ab65375b2aa7abd7702d32"
+          }
+        },
+        {
           "client_id": "972003711031-4o27g7sjiet4kqq1l12j15ig0ji36ik3.apps.googleusercontent.com",
           "client_type": 3
         }

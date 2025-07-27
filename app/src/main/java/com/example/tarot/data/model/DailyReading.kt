@@ -11,5 +11,6 @@ data class DailyReading(
     val cardName: String,
     val isRevealed: Boolean = false,
     val isReversed: Boolean = false, // Track if card is drawn reversed
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = System.currentTimeMillis(),
+    val aiGuidance: String? = null // Store personalized AI guidance
 )

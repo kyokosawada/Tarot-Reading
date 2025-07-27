@@ -92,6 +92,14 @@ class TarotRepository(
         dailyReadingDao.updateDailyReading(dailyReading)
     }
 
+    suspend fun updateDailyReadingWithAiGuidance(date: String, aiGuidance: String) {
+        val existingReading = dailyReadingDao.getDailyReadingByDate(date)
+        if (existingReading != null) {
+            val updatedReading = existingReading.copy(aiGuidance = aiGuidance)
+            dailyReadingDao.updateDailyReading(updatedReading)
+        }
+    }
+
     suspend fun getAllDailyReadings(): List<DailyReading> {
         return dailyReadingDao.getAllDailyReadings()
     }

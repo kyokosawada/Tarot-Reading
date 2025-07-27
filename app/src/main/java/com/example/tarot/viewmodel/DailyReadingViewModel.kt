@@ -8,6 +8,7 @@ import com.example.tarot.data.model.TarotCard
 import com.example.tarot.data.model.getReversedKeywordsList
 import com.example.tarot.data.model.getUprightKeywordsList
 import com.example.tarot.data.repository.JourneyRepository
+import com.example.tarot.data.repository.OpenAiRepository
 import com.example.tarot.data.repository.SettingsRepository
 import com.example.tarot.data.repository.TarotRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,13 +30,19 @@ data class DailyReadingUiState(
     val hasDrawnToday: Boolean = false,
     val isReversed: Boolean = false,
     val allowReversedCards: Boolean = false, // Will be set from settings
-    val streakStatus: JourneyRepository.StreakStatus? = null // Add streak tracking
+    val streakStatus: JourneyRepository.StreakStatus? = null, // Add streak tracking
+    val aiGeneratedMessage: String? = null,
+    val isAiLoading: Boolean = false,
+    val aiError: String? = null,
+    val isProcessingReveal: Boolean = false, // Prevent spam clicking
+    val isGuidanceReady: Boolean = false // Track if guidance is ready to show card
 )
 
 class DailyReadingViewModel(
     private val tarotRepository: TarotRepository,
     private val settingsRepository: SettingsRepository,
-    private val journeyRepository: JourneyRepository
+    private val journeyRepository: JourneyRepository,
+    private val openAiRepository: OpenAiRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DailyReadingUiState())
@@ -49,6 +56,91 @@ class DailyReadingViewModel(
         }
         checkDailyReading()
         loadStreakStatus()
+    }
+
+    private fun generatePersonalizedDailyMessage() {
+        val card = _uiState.value.dailyCard ?: return
+        val isReversed = _uiState.value.isReversed
+        val dailyReading = _uiState.value.dailyReading
+
+        viewModelScope.launch {
+            try {
+                // Check if AI guidance already exists in the database
+                if (dailyReading?.aiGuidance != null) {
+                    Log.d(
+                        "DailyReadingViewModel",
+                        "AI guidance already exists, using cached version"
+                    )
+                    _uiState.value = _uiState.value.copy(
+                        aiGeneratedMessage = dailyReading.aiGuidance,
+                        isAiLoading = false,
+                        aiError = null,
+                        isGuidanceReady = true
+                    )
+                    return@launch
+                }
+
+                // No cached guidance, generate new one
+                Log.d("DailyReadingViewModel", "No cached AI guidance, generating new one")
+
+                _uiState.value = _uiState.value.copy(
+                    isAiLoading = true,
+                    aiError = null
+                )
+
+                // Create a daily reading question for the AI
+                val dailyQuestion = "What guidance does this card offer for today?"
+
+                val result = openAiRepository.getPersonalizedTarotReading(
+                    question = dailyQuestion,
+                    allowReversed = _uiState.value.allowReversedCards
+                )
+
+                result.fold(
+                    onSuccess = { tarotReading ->
+                        val guidance = tarotReading.personalizedGuidance
+
+                        // Save the guidance to database for future use
+                        val currentDate = getCurrentDateForDatabase()
+                        tarotRepository.updateDailyReadingWithAiGuidance(currentDate, guidance)
+
+                        // Update the local state with the new guidance
+                        val updatedReading = dailyReading?.copy(aiGuidance = guidance)
+
+                        _uiState.value = _uiState.value.copy(
+                            aiGeneratedMessage = guidance,
+                            isAiLoading = false,
+                            aiError = null,
+                            isGuidanceReady = true,
+                            dailyReading = updatedReading
+                        )
+                    },
+                    onFailure = { exception ->
+                        _uiState.value = _uiState.value.copy(
+                            isAiLoading = false,
+                            aiError = exception.message
+                                ?: "Failed to generate personalized guidance",
+                            isGuidanceReady = true
+                        )
+                    }
+                )
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isAiLoading = false,
+                    aiError = "An error occurred while generating personalized guidance",
+                    isGuidanceReady = true
+                )
+                Log.e("DailyReadingViewModel", "Error generating personalized message", e)
+            }
+        }
+    }
+
+    fun retryAiGeneration() {
+        generatePersonalizedDailyMessage()
+    }
+
+    fun clearAiError() {
+        _uiState.value = _uiState.value.copy(aiError = null)
     }
 
     private fun checkDailyReading() {
@@ -69,8 +161,13 @@ class DailyReadingViewModel(
                         isCardRevealed = existingReading.isRevealed,
                         readingDate = currentDate,
                         hasDrawnToday = true,
-                        isReversed = existingReading.isReversed
+                        isReversed = existingReading.isReversed,
+                        isGuidanceReady = existingReading.aiGuidance != null,
+                        aiGeneratedMessage = existingReading.aiGuidance
                     )
+
+                    // Always generate personalized message for existing reading
+                    generatePersonalizedDailyMessage()
                 } else {
                     // No reading for today, draw a new card
                     drawDailyCard()
@@ -124,6 +221,9 @@ class DailyReadingViewModel(
                     errorMessage = null
                 )
 
+                // Start generating AI guidance immediately so it's ready when user taps
+                generatePersonalizedDailyMessage()
+
                 // Clean up old readings (keep last 30 days)
                 tarotRepository.cleanupOldReadings(30)
 
@@ -140,6 +240,17 @@ class DailyReadingViewModel(
     fun revealCard() {
         viewModelScope.launch {
             try {
+                // Prevent spam clicking
+                if (_uiState.value.isProcessingReveal) {
+                    Log.d(
+                        "DailyReadingViewModel",
+                        "Card reveal already in progress, ignoring click"
+                    )
+                    return@launch
+                }
+
+                _uiState.value = _uiState.value.copy(isProcessingReveal = true)
+
                 val currentReading = _uiState.value.dailyReading
                 if (currentReading != null && !currentReading.isRevealed) {
                     // Update reading as revealed in database
@@ -155,15 +266,26 @@ class DailyReadingViewModel(
                     _uiState.value = _uiState.value.copy(
                         isCardRevealed = true,
                         dailyReading = updatedReading,
-                        streakStatus = streakStatus
+                        streakStatus = streakStatus,
+                        isProcessingReveal = false
                     )
+
+                    // Guidance is already pre-loaded, no need to generate again
                 } else {
                     // Fallback for local state update
-                    _uiState.value = _uiState.value.copy(isCardRevealed = true)
+                    _uiState.value = _uiState.value.copy(
+                        isCardRevealed = true,
+                        isProcessingReveal = false
+                    )
+                    // Guidance is already pre-loaded, no need to generate again
                 }
             } catch (e: Exception) {
                 // If database update fails, still update UI
-                _uiState.value = _uiState.value.copy(isCardRevealed = true)
+                _uiState.value = _uiState.value.copy(
+                    isCardRevealed = true,
+                    isProcessingReveal = false
+                )
+                // Guidance is already pre-loaded, no need to generate again
                 Log.e("DailyReadingViewModel", "Failed to update reading reveal status", e)
             }
         }
@@ -213,6 +335,11 @@ class DailyReadingViewModel(
         } else {
             card.getUprightKeywordsList().joinToString(" • ")
         }
+    }
+
+    // Helper: get current date in database-friendly format for querying today (yyyy-MM-dd)
+    private fun getCurrentDateForDatabase(): String {
+        return SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
     }
 
     // Helper function to get 3 random keywords for daily reading
