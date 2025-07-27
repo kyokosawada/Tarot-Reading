@@ -42,7 +42,8 @@ class DailyReadingViewModel(
     private val tarotRepository: TarotRepository,
     private val settingsRepository: SettingsRepository,
     private val journeyRepository: JourneyRepository,
-    private val openAiRepository: OpenAiRepository
+    private val openAiRepository: OpenAiRepository,
+    private val firebaseRepository: com.example.tarot.data.FirebaseRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DailyReadingUiState())
@@ -256,6 +257,46 @@ class DailyReadingViewModel(
                     // Update reading as revealed in database
                     val updatedReading = currentReading.copy(isRevealed = true)
                     tarotRepository.updateDailyReading(updatedReading)
+
+                    // Save to Firebase
+                    val card = _uiState.value.dailyCard
+                    if (card != null) {
+                        viewModelScope.launch {
+                            try {
+                                val tarotReading = com.example.tarot.viewmodel.TarotReading(
+                                    id = "daily_${System.currentTimeMillis()}",
+                                    type = "daily",
+                                    title = "Daily Reading",
+                                    date = getCurrentDateForDatabase(),
+                                    cards = listOf(card),
+                                    interpretation = _uiState.value.aiGeneratedMessage
+                                        ?: (if (_uiState.value.isReversed) card.reversedDailyMessage else card.uprightDailyMessage),
+                                    journalNotes = ""
+                                )
+
+                                val saveResult = firebaseRepository.saveTarotReading(tarotReading)
+                                saveResult.fold(
+                                    onSuccess = {
+                                        android.util.Log.d(
+                                            "DailyReadingViewModel",
+                                            "Daily reading saved successfully"
+                                        )
+                                    },
+                                    onFailure = { error ->
+                                        android.util.Log.e(
+                                            "DailyReadingViewModel",
+                                            "Failed to save daily reading: ${error.message}"
+                                        )
+                                    }
+                                )
+                            } catch (e: Exception) {
+                                android.util.Log.e(
+                                    "DailyReadingViewModel",
+                                    "Error saving daily reading: ${e.message}"
+                                )
+                            }
+                        }
+                    }
 
                     // Update streak tracking (only on first reveal)
                     journeyRepository.onDailyReadingCompleted()

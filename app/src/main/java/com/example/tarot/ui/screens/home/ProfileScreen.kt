@@ -62,6 +62,7 @@ fun ProfileScreen(
     onBackClick: () -> Unit = {},
     onEditProfileClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {},
+    onReadingHistoryClick: () -> Unit = {}, // Add reading history callback
     onLogoutClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -112,7 +113,8 @@ fun ProfileScreen(
 
                 item {
                     PreferencesSection(
-                        onSettingsClick = onSettingsClick
+                        onSettingsClick = onSettingsClick,
+                        onReadingHistoryClick = onReadingHistoryClick
                     )
                 }
 
@@ -292,6 +294,7 @@ fun StatItem(
 @Composable
 fun PreferencesSection(
     onSettingsClick: () -> Unit = {},
+    onReadingHistoryClick: () -> Unit = {}, // Add reading history callback
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -320,7 +323,7 @@ fun PreferencesSection(
                 icon = Icons.AutoMirrored.Filled.List,
                 title = "Reading History",
                 subtitle = "View your past readings",
-                onClick = { }
+                onClick = onReadingHistoryClick
             )
             
             Spacer(modifier = Modifier.height(8.dp))

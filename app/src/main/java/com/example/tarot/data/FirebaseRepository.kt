@@ -18,7 +18,7 @@ class FirebaseRepository {
 
     // Collections
     private val usersCollection = firestore.collection("users")
-    private val readingsCollection = firestore.collection("readings")
+    // No global readings collection; readings are stored in per-user subcollections
 
     // Save user profile to Firestore
     suspend fun saveUserProfile(user: User): Result<Unit> {
@@ -75,14 +75,22 @@ class FirebaseRepository {
         }
     }
 
-    // Save tarot reading to Firestore
+    // Save tarot reading to user's subcollection
     suspend fun saveTarotReading(reading: TarotReading): Result<Unit> {
         return try {
-            val userId =
-                auth.currentUser?.uid ?: return Result.failure(Exception("User not authenticated"))
+            val userId = auth.currentUser?.uid
+            android.util.Log.d("FirebaseRepository", "🔍 saveTarotReading called")
+            android.util.Log.d("FirebaseRepository", "📝 Reading ID: ${reading.id}")
+            android.util.Log.d("FirebaseRepository", "👤 Current user ID: $userId")
+
+            if (userId == null) {
+                android.util.Log.e("FirebaseRepository", "❌ User not authenticated")
+                return Result.failure(Exception("User not authenticated"))
+            }
+
+            android.util.Log.d("FirebaseRepository", "📊 Preparing reading data...")
             val readingData = mapOf(
                 "id" to reading.id,
-                "userId" to userId,
                 "type" to reading.type,
                 "title" to reading.title,
                 "date" to reading.date,
@@ -103,16 +111,59 @@ class FirebaseRepository {
                     )
                 },
                 "interpretation" to reading.interpretation,
+                "journalNotes" to reading.journalNotes,
                 "createdAt" to System.currentTimeMillis()
             )
-            readingsCollection.document(reading.id).set(readingData).await()
+
+            android.util.Log.d("FirebaseRepository", "💾 Saving to user's readings subcollection...")
+            // Save to user's readings subcollection instead of global collection
+            usersCollection.document(userId)
+                .collection("readings")
+                .document(reading.id)
+                .set(readingData)
+                .await()
+
+            android.util.Log.d("FirebaseRepository", "✅ Successfully saved reading: ${reading.id}")
             Result.success(Unit)
         } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "❌ Error saving reading: ${e.message}", e)
             Result.failure(e)
         }
     }
 
-    // Get user's tarot readings from Firestore
+    // Update journal notes for a specific reading
+    suspend fun updateJournalNotes(readingId: String, notes: String): Result<Unit> {
+        return try {
+            val userId = auth.currentUser?.uid
+            if (userId == null) {
+                android.util.Log.e("FirebaseRepository", "❌ User not authenticated")
+                return Result.failure(Exception("User not authenticated"))
+            }
+
+            android.util.Log.d(
+                "FirebaseRepository",
+                "📝 Updating journal notes for reading: $readingId"
+            )
+
+            usersCollection.document(userId)
+                .collection("readings")
+                .document(readingId)
+                .update("journalNotes", notes)
+                .await()
+
+            android.util.Log.d("FirebaseRepository", "✅ Successfully updated journal notes")
+            Result.success(Unit)
+        } catch (e: Exception) {
+            android.util.Log.e(
+                "FirebaseRepository",
+                "❌ Error updating journal notes: ${e.message}",
+                e
+            )
+            Result.failure(e)
+        }
+    }
+
+    // Get user's tarot readings from Firestore (from per-user subcollection)
     fun getUserReadings(limit: Int = 10): Flow<List<TarotReading>> = callbackFlow {
         val userId = auth.currentUser?.uid
         if (userId == null) {
@@ -121,13 +172,43 @@ class FirebaseRepository {
             return@callbackFlow
         }
 
-        val listener = readingsCollection
-            .whereEqualTo("userId", userId)
+        val listener = usersCollection
+            .document(userId)
+            .collection("readings")
             .orderBy("createdAt", Query.Direction.DESCENDING)
             .limit(limit.toLong())
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    close(error)
+                    // Handle specific Firestore errors gracefully
+                    when {
+                        error.message?.contains("requires an index") == true -> {
+                            // Index missing - return empty list instead of crashing
+                            android.util.Log.w(
+                                "FirebaseRepository",
+                                "Firestore index missing for readings query. Returning empty list."
+                            )
+                            trySend(emptyList())
+                        }
+
+                        error.message?.contains("PERMISSION_DENIED") == true -> {
+                            // Permission denied - return empty list
+                            android.util.Log.w(
+                                "FirebaseRepository",
+                                "Permission denied for readings query. Returning empty list."
+                            )
+                            trySend(emptyList())
+                        }
+
+                        else -> {
+                            // Other errors - log and return empty list
+                            android.util.Log.e(
+                                "FirebaseRepository",
+                                "Error loading readings: ${error.message}",
+                                error
+                            )
+                            trySend(emptyList())
+                        }
+                    }
                     return@addSnapshotListener
                 }
 
@@ -171,9 +252,15 @@ class FirebaseRepository {
                                     numerology = null
                                 )
                             } ?: emptyList(),
-                            interpretation = data["interpretation"] as? String ?: ""
+                            interpretation = data["interpretation"] as? String ?: "",
+                            journalNotes = data["journalNotes"] as? String ?: ""
                         )
                     } catch (e: Exception) {
+                        android.util.Log.e(
+                            "FirebaseRepository",
+                            "Error parsing reading document: ${e.message}",
+                            e
+                        )
                         null
                     }
                 } ?: emptyList()

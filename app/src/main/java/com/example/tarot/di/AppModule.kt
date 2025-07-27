@@ -131,7 +131,8 @@ val appModule = module {
             tarotRepository = get(),
             settingsRepository = get(),
             journeyRepository = get(),
-            openAiRepository = get()
+            openAiRepository = get(),
+            firebaseRepository = get()
         )
     }
     
@@ -139,7 +140,8 @@ val appModule = module {
         AskQuestionViewModel(
             openAiRepository = get(),
             settingsRepository = get(),
-            journeyRepository = get()
+            journeyRepository = get(),
+            firebaseRepository = get()
         )
     }
     

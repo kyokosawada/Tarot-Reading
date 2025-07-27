@@ -2,6 +2,7 @@ package com.example.tarot.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.tarot.data.FirebaseRepository
 import com.example.tarot.data.model.TarotReadingResponse
 import com.example.tarot.data.repository.JourneyRepository
 import com.example.tarot.data.repository.OpenAiRepository
@@ -11,12 +12,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class AskQuestionViewModel(
     private val openAiRepository: OpenAiRepository,
     private val settingsRepository: SettingsRepository,
-    private val journeyRepository: JourneyRepository
+    private val journeyRepository: JourneyRepository,
+    private val firebaseRepository: FirebaseRepository
 ) : ViewModel() {
+
+    private fun getCurrentDate(): String {
+        return SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+    }
 
     private val _uiState = MutableStateFlow(AskQuestionUiState())
     val uiState: StateFlow<AskQuestionUiState> = _uiState.asStateFlow()
@@ -28,6 +37,8 @@ class AskQuestionViewModel(
 
         lastQuestion = question // Store for retry
 
+        android.util.Log.d("AskQuestionViewModel", "🚀 Starting askQuestion with: $question")
+
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
                 isLoading = true,
@@ -37,6 +48,8 @@ class AskQuestionViewModel(
             // Get current settings
             val allowReversed = settingsRepository.getCurrentAllowReversedCards()
 
+            android.util.Log.d("AskQuestionViewModel", "🔄 Calling OpenAI API...")
+
             val result = openAiRepository.getPersonalizedTarotReading(
                 question = question,
                 apiKey = apiKey ?: ApiKeyManager.getOpenAiApiKey(),
@@ -45,10 +58,48 @@ class AskQuestionViewModel(
 
             result.fold(
                 onSuccess = { reading ->
-                    // Increment reading journey metric on successful reading
-                    viewModelScope.launch {
-                        journeyRepository.incrementReading()
+                    // Save reading to Firebase (remove nested coroutine)
+                    try {
+                        val tarotReading = com.example.tarot.viewmodel.TarotReading(
+                            id = "question_${System.currentTimeMillis()}",
+                            type = "question",
+                            title = "Question Reading",
+                            date = getCurrentDate(),
+                            cards = listOf(reading.tarotCard),
+                            interpretation = reading.personalizedGuidance,
+                            journalNotes = ""
+                        )
+
+                        android.util.Log.d(
+                            "AskQuestionViewModel",
+                            "🔄 Attempting to save reading: ${tarotReading.id}"
+                        )
+
+                        // Save to Firebase directly (already in coroutine scope)
+                        val saveResult = firebaseRepository.saveTarotReading(tarotReading)
+                        saveResult.fold(
+                            onSuccess = {
+                                android.util.Log.d(
+                                    "AskQuestionViewModel",
+                                    "✅ Reading saved successfully: ${tarotReading.id}"
+                                )
+                            },
+                            onFailure = { error ->
+                                android.util.Log.e(
+                                    "AskQuestionViewModel",
+                                    "❌ Failed to save reading: ${error.message}"
+                                )
+                            }
+                        )
+                    } catch (e: Exception) {
+                        android.util.Log.e(
+                            "AskQuestionViewModel",
+                            "❌ Error saving reading: ${e.message}"
+                        )
                     }
+
+                    // Increment reading journey metric on successful reading
+                    journeyRepository.incrementReading()
 
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
@@ -58,6 +109,10 @@ class AskQuestionViewModel(
                     )
                 },
                 onFailure = { exception ->
+                    android.util.Log.e(
+                        "AskQuestionViewModel",
+                        "❌ OpenAI API call failed: ${exception.message}"
+                    )
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         error = exception.message ?: "An error occurred",

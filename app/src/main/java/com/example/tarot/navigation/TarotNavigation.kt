@@ -22,6 +22,7 @@ import com.example.tarot.ui.screens.auth.ForgotPasswordScreen
 import com.example.tarot.ui.screens.auth.LoginScreen
 import com.example.tarot.ui.screens.auth.ProfileCompletionScreen
 import com.example.tarot.ui.screens.auth.SignUpScreen
+import com.example.tarot.ui.screens.history.ReadingHistoryScreen
 import com.example.tarot.ui.screens.home.HomeScreen
 import com.example.tarot.ui.screens.home.ProfileScreen
 import com.example.tarot.ui.screens.reading.AskQuestionScreen
@@ -43,6 +44,7 @@ object Routes {
     const val DAILY_READING = "daily_reading"
     const val ASK_QUESTION = "ask_question"
     const val PALM_READING = "palm_reading"
+    const val READING_HISTORY = "reading_history" // Add reading history route
 }
 
 // Animation constants
@@ -335,6 +337,9 @@ fun TarotNavigation(
                     onSettingsClick = {
                         navController.navigate(Routes.SETTINGS)
                     },
+                    onReadingHistoryClick = {
+                        navController.navigate(Routes.READING_HISTORY)
+                    },
                     onLogoutClick = {
                         authViewModel.clearMessages()
                         authViewModel.logout()
@@ -446,6 +451,34 @@ fun TarotNavigation(
                 }
             ) {
                 PalmReadingScreen(
+                    onBackClick = {
+                        navController.popBackStack()
+                    }
+                )
+
+                // Handle back press
+                BackHandler {
+                    navController.popBackStack()
+                }
+            }
+
+            // Reading History screen
+            composable(
+                route = Routes.READING_HISTORY,
+                enterTransition = {
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Left,
+                        animationSpec = tween(ANIMATION_DURATION)
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(ANIMATION_DURATION)
+                    )
+                }
+            ) {
+                ReadingHistoryScreen(
                     onBackClick = {
                         navController.popBackStack()
                     }

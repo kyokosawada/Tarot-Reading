@@ -32,7 +32,8 @@ data class TarotReading(
     val title: String,
     val date: String,
     val cards: List<TarotCard>,
-    val interpretation: String
+    val interpretation: String,
+    val journalNotes: String = "" // Add journal support
 )
 
 
@@ -162,6 +163,36 @@ class HomeViewModel(
 
     fun clearError() {
         _uiState.value = _uiState.value.copy(errorMessage = null)
+    }
+
+    fun updateJournalNotes(readingId: String, notes: String) {
+        viewModelScope.launch {
+            try {
+                val result = firebaseRepository.updateJournalNotes(readingId, notes)
+                result.fold(
+                    onSuccess = {
+                        // Update the reading in the current state
+                        val updatedReadings = _uiState.value.recentReadings.map { reading ->
+                            if (reading.id == readingId) {
+                                reading.copy(journalNotes = notes)
+                            } else {
+                                reading
+                            }
+                        }
+                        _uiState.value = _uiState.value.copy(recentReadings = updatedReadings)
+                    },
+                    onFailure = { error ->
+                        _uiState.value = _uiState.value.copy(
+                            errorMessage = "Failed to update journal: ${error.message}"
+                        )
+                    }
+                )
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    errorMessage = "Error updating journal: ${e.message}"
+                )
+            }
+        }
     }
 
     private suspend fun generateDailyInsight(): DailyInsight {
